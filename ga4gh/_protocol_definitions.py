@@ -207,6 +207,108 @@ class AnalysisResult(ProtocolElement):
         """
 
 
+class BioSample(ProtocolElement):
+    """
+    A BioSample refers to a unit of biological material from which the
+    substrate   molecules (e.g. genomic DNA, RNA, proteins) for
+    molecular analyses (e.g.   sequencing, array hybridisation, mass-
+    spectrometry) are extracted. Examples   would be a tissue biopsy,
+    a single cell from a culture for single cell genome   sequencing
+    or a protein fraction from a gradient centrifugation.   Several
+    instances (e.g. technical replicates) or types of experiments
+    (e.g.   genomic array as well as RNA-seq experiments) may refer to
+    the same BioSample.   In the context of the GA4GH metadata schema,
+    BioSample constitutes the central   reference object.
+    """
+    _schemaSource = """
+{"namespace": "org.ga4gh.models", "type": "record", "name":
+"BioSample", "fields": [{"doc": "", "type": "string", "name": "id"},
+{"default": null, "doc": "", "type": ["null", "string"], "name":
+"name"}, {"default": null, "doc": "", "type": ["null", "string"],
+"name": "description"}, {"default": null, "doc": "", "type": ["null",
+{"doc": "", "type": "record", "name": "OntologyTerm", "fields":
+[{"doc": "", "type": "string", "name": "id"}, {"default": null, "doc":
+"", "type": ["null", "string"], "name": "term"}, {"default": null,
+"doc": "", "type": ["null", "string"], "name": "value"}, {"default":
+null, "doc": "", "type": ["null", "string"], "name": "sourceName"},
+{"default": null, "doc": "", "type": ["null", "string"], "name":
+"sourceVersion"}]}], "name": "disease"}, {"doc": "", "type": "string",
+"name": "createDateTime"}, {"doc": "", "type": "string", "name":
+"updateDateTime"}, {"default": {}, "doc": "", "type": {"values":
+{"items": "string", "type": "array"}, "type": "map"}, "name":
+"info"}], "doc": ""}
+"""
+    schema = avro.schema.parse(_schemaSource)
+    requiredFields = set([
+        "createDateTime",
+        "id",
+        "updateDateTime",
+    ])
+
+    @classmethod
+    def isEmbeddedType(cls, fieldName):
+        embeddedTypes = {
+            'disease': OntologyTerm,
+        }
+        return fieldName in embeddedTypes
+
+    @classmethod
+    def getEmbeddedType(cls, fieldName):
+        embeddedTypes = {
+            'disease': OntologyTerm,
+        }
+
+        return embeddedTypes[fieldName]
+
+    __slots__ = [
+        'createDateTime', 'description', 'disease', 'id', 'info',
+        'name', 'updateDateTime'
+    ]
+
+    def __init__(self, **kwargs):
+        self.createDateTime = kwargs.get(
+            'createDateTime', None)
+        """
+        The :ref:ISO 8601<metadata_date_time> time at which this
+        BioSample record    was created.
+        """
+        self.description = kwargs.get(
+            'description', None)
+        """
+        The biosample's description. This attribute contains human
+        readable text.    The "description" attributes should not
+        contain any structured data.
+        """
+        self.disease = kwargs.get(
+            'disease', None)
+        """
+        Disease annotation of the sample.
+        """
+        self.id = kwargs.get(
+            'id', None)
+        """
+        The BioSample :ref:id <apidesign_object_ids>. This is unique
+        in the    context of the server instance.
+        """
+        self.info = kwargs.get(
+            'info', {})
+        """
+        A map of additional information.
+        """
+        self.name = kwargs.get(
+            'name', None)
+        """
+        The BioSample's :ref:name <apidesign_object_names>. This is a
+        label or    symbolic identifier for the biosample.
+        """
+        self.updateDateTime = kwargs.get(
+            'updateDateTime', None)
+        """
+        The :ref:ISO 8601<metadata_date_time> time at which this
+        BioSample record was updated.
+        """
+
+
 class Call(ProtocolElement):
     """
     A Call represents the determination of genotype with respect to a
@@ -312,8 +414,8 @@ class CallSet(ProtocolElement):
 {"namespace": "org.ga4gh.models", "type": "record", "name": "CallSet",
 "fields": [{"doc": "", "type": "string", "name": "id"}, {"default":
 null, "doc": "", "type": ["null", "string"], "name": "name"}, {"doc":
-"", "type": ["null", "string"], "name": "sampleId"}, {"default": [],
-"doc": "", "type": {"items": "string", "type": "array"}, "name":
+"", "type": ["null", "string"], "name": "bioSampleId"}, {"default":
+[], "doc": "", "type": {"items": "string", "type": "array"}, "name":
 "variantSetIds"}, {"default": null, "doc": "", "type": ["null",
 "long"], "name": "created"}, {"default": null, "doc": "", "type":
 ["null", "long"], "name": "updated"}, {"default": {}, "doc": "",
@@ -322,8 +424,8 @@ null, "doc": "", "type": ["null", "string"], "name": "name"}, {"doc":
 """
     schema = avro.schema.parse(_schemaSource)
     requiredFields = set([
+        "bioSampleId",
         "id",
-        "sampleId",
     ])
 
     @classmethod
@@ -338,11 +440,16 @@ null, "doc": "", "type": ["null", "string"], "name": "name"}, {"doc":
         return embeddedTypes[fieldName]
 
     __slots__ = [
-        'created', 'id', 'info', 'name', 'sampleId', 'updated',
+        'bioSampleId', 'created', 'id', 'info', 'name', 'updated',
         'variantSetIds'
     ]
 
     def __init__(self, **kwargs):
+        self.bioSampleId = kwargs.get(
+            'bioSampleId', None)
+        """
+        The BioSample this call set's data was generated from.
+        """
         self.created = kwargs.get(
             'created', None)
         """
@@ -363,15 +470,6 @@ null, "doc": "", "type": ["null", "string"], "name": "name"}, {"doc":
             'name', None)
         """
         The call set name.
-        """
-        self.sampleId = kwargs.get(
-            'sampleId', None)
-        """
-        The sample this call set's data was generated from.   Note:
-        the current API does not have a rigorous definition of sample.
-        Therefore, this   field actually contains an arbitrary string,
-        typically corresponding to the sampleId   field in the read
-        groups used to generate this call set.
         """
         self.updated = kwargs.get(
             'updated', None)
@@ -1020,15 +1118,16 @@ class ListReferenceBasesResponse(ProtocolElement):
 class OntologyTerm(ProtocolElement):
     """
     An ontology term describing an attribute. (e.g. the phenotype
-    attribute   'polydactyly' from HPO)
+    attribute 'polydactyly' from HPO)
     """
     _schemaSource = """
 {"namespace": "org.ga4gh.models", "type": "record", "name":
 "OntologyTerm", "fields": [{"doc": "", "type": "string", "name":
 "id"}, {"default": null, "doc": "", "type": ["null", "string"],
 "name": "term"}, {"default": null, "doc": "", "type": ["null",
-"string"], "name": "sourceName"}, {"default": null, "doc": "", "type":
-["null", "string"], "name": "sourceVersion"}], "doc": ""}
+"string"], "name": "value"}, {"default": null, "doc": "", "type":
+["null", "string"], "name": "sourceName"}, {"default": null, "doc":
+"", "type": ["null", "string"], "name": "sourceVersion"}], "doc": ""}
 """
     schema = avro.schema.parse(_schemaSource)
     requiredFields = set([
@@ -1047,19 +1146,20 @@ class OntologyTerm(ProtocolElement):
         return embeddedTypes[fieldName]
 
     __slots__ = [
-        'id', 'sourceName', 'sourceVersion', 'term'
+        'id', 'sourceName', 'sourceVersion', 'term', 'value'
     ]
 
     def __init__(self, **kwargs):
         self.id = kwargs.get(
             'id', None)
         """
-        Ontology source identifier - the identifier, a CURIE
-        (preferred) or   PURL for an ontology source e.g.
-        http://purl.obolibrary.org/obo/hp.obo   It differs from the
-        standard GA4GH schema's :ref:id <apidesign_object_ids>   in
-        that it is a URI pointing to an information resource outside
-        of the scope   of the schema or its resource implementation.
+        :ref:Ontology<metadata_ontologies> source identifier -   the
+        identifier, a CURIE (preferred) or PURL for an ontology
+        source.   Example: http://purl.obolibrary.org/obo/hp.obo   It
+        differs from the standard GA4GH schema's :ref:id
+        <apidesign_object_ids>   in that it is a URI pointing to an
+        information resource outside of the scope   of the schema or
+        its resource implementation.
         """
         self.sourceName = kwargs.get(
             'sourceName', None)
@@ -1079,6 +1179,13 @@ class OntologyTerm(ProtocolElement):
             'term', None)
         """
         Ontology term - the representation the id is pointing to.
+        """
+        self.value = kwargs.get(
+            'value', None)
+        """
+        Ontology value - In the case of using e.g. UnitOntology, the
+        id/term represent   a unit of measurement and this would be
+        the measured value.
         """
 
 
@@ -1419,11 +1526,11 @@ class ReadGroup(ProtocolElement):
 "datasetId"}, {"default": null, "doc": "", "type": ["null", "string"],
 "name": "name"}, {"default": null, "doc": "", "type": ["null",
 "string"], "name": "description"}, {"doc": "", "type": ["null",
-"string"], "name": "sampleId"}, {"doc": "", "type": ["null", {"doc":
-"", "type": "record", "name": "Experiment", "fields": [{"doc": "",
-"type": "string", "name": "id"}, {"default": null, "doc": "", "type":
-["null", "string"], "name": "name"}, {"default": null, "doc": "",
-"type": ["null", "string"], "name": "description"}, {"doc": "",
+"string"], "name": "bioSampleId"}, {"doc": "", "type": ["null",
+{"doc": "", "type": "record", "name": "Experiment", "fields": [{"doc":
+"", "type": "string", "name": "id"}, {"default": null, "doc": "",
+"type": ["null", "string"], "name": "name"}, {"default": null, "doc":
+"", "type": ["null", "string"], "name": "description"}, {"doc": "",
 "type": "string", "name": "createDateTime"}, {"doc": "", "type":
 "string", "name": "updateDateTime"}, {"default": null, "doc": "",
 "type": ["null", "string"], "name": "runTime"}, {"default": null,
@@ -1463,9 +1570,9 @@ null, "doc": "", "type": ["null", "long"], "name": "created"},
 """
     schema = avro.schema.parse(_schemaSource)
     requiredFields = set([
+        "bioSampleId",
         "experiment",
         "id",
-        "sampleId",
     ])
 
     @classmethod
@@ -1488,12 +1595,17 @@ null, "doc": "", "type": ["null", "long"], "name": "created"},
         return embeddedTypes[fieldName]
 
     __slots__ = [
-        'created', 'datasetId', 'description', 'experiment', 'id',
-        'info', 'name', 'predictedInsertSize', 'programs',
-        'referenceSetId', 'sampleId', 'stats', 'updated'
+        'bioSampleId', 'created', 'datasetId', 'description',
+        'experiment', 'id', 'info', 'name', 'predictedInsertSize',
+        'programs', 'referenceSetId', 'stats', 'updated'
     ]
 
     def __init__(self, **kwargs):
+        self.bioSampleId = kwargs.get(
+            'bioSampleId', None)
+        """
+        The BioSample this read group's data was generated from.
+        """
         self.created = kwargs.get(
             'created', None)
         """
@@ -1547,14 +1659,6 @@ null, "doc": "", "type": ["null", "long"], "name": "created"},
         group are aligned.   Required if there are any read
         alignments.
         """
-        self.sampleId = kwargs.get(
-            'sampleId', None)
-        """
-        The sample this read group's data was generated from.   Note:
-        the current API does not have a rigorous definition of sample.
-        Therefore, this   field actually contains an arbitrary string,
-        typically corresponding to the SM tag in a   BAM file.
-        """
         self.stats = kwargs.get(
             'stats', None)
         """
@@ -1591,44 +1695,44 @@ class ReadGroupSet(ProtocolElement):
 "string"], "name": "datasetId"}, {"default": null, "doc": "", "type":
 ["null", "string"], "name": "name"}, {"default": null, "doc": "",
 "type": ["null", "string"], "name": "description"}, {"doc": "",
-"type": ["null", "string"], "name": "sampleId"}, {"doc": "", "type":
-["null", {"doc": "", "type": "record", "name": "Experiment", "fields":
-[{"doc": "", "type": "string", "name": "id"}, {"default": null, "doc":
+"type": ["null", "string"], "name": "bioSampleId"}, {"doc": "",
+"type": ["null", {"doc": "", "type": "record", "name": "Experiment",
+"fields": [{"doc": "", "type": "string", "name": "id"}, {"default":
+null, "doc": "", "type": ["null", "string"], "name": "name"},
+{"default": null, "doc": "", "type": ["null", "string"], "name":
+"description"}, {"doc": "", "type": "string", "name":
+"createDateTime"}, {"doc": "", "type": "string", "name":
+"updateDateTime"}, {"default": null, "doc": "", "type": ["null",
+"string"], "name": "runTime"}, {"default": null, "doc": "", "type":
+["null", "string"], "name": "molecule"}, {"default": null, "doc": "",
+"type": ["null", "string"], "name": "strategy"}, {"default": null,
+"doc": "", "type": ["null", "string"], "name": "selection"},
+{"default": null, "doc": "", "type": ["null", "string"], "name":
+"library"}, {"default": null, "doc": "", "type": ["null", "string"],
+"name": "libraryLayout"}, {"doc": "", "type": ["null", "string"],
+"name": "instrumentModel"}, {"default": null, "doc": "", "type":
+["null", "string"], "name": "instrumentDataFile"}, {"doc": "", "type":
+["null", "string"], "name": "sequencingCenter"}, {"default": null,
+"doc": "", "type": ["null", "string"], "name": "platformUnit"},
+{"default": {}, "doc": "", "type": {"values": {"items": "string",
+"type": "array"}, "type": "map"}, "name": "info"}]}], "name":
+"experiment"}, {"default": null, "doc": "", "type": ["null", "int"],
+"name": "predictedInsertSize"}, {"default": null, "doc": "", "type":
+["null", "long"], "name": "created"}, {"default": null, "doc": "",
+"type": ["null", "long"], "name": "updated"}, {"default": null, "doc":
+"", "type": ["null", "ReadStats"], "name": "stats"}, {"default": [],
+"doc": "", "type": {"items": {"doc": "", "type": "record", "name":
+"Program", "fields": [{"default": null, "doc": "", "type": ["null",
+"string"], "name": "commandLine"}, {"default": null, "doc": "",
+"type": ["null", "string"], "name": "id"}, {"default": null, "doc":
 "", "type": ["null", "string"], "name": "name"}, {"default": null,
-"doc": "", "type": ["null", "string"], "name": "description"}, {"doc":
-"", "type": "string", "name": "createDateTime"}, {"doc": "", "type":
-"string", "name": "updateDateTime"}, {"default": null, "doc": "",
-"type": ["null", "string"], "name": "runTime"}, {"default": null,
-"doc": "", "type": ["null", "string"], "name": "molecule"},
+"doc": "", "type": ["null", "string"], "name": "prevProgramId"},
 {"default": null, "doc": "", "type": ["null", "string"], "name":
-"strategy"}, {"default": null, "doc": "", "type": ["null", "string"],
-"name": "selection"}, {"default": null, "doc": "", "type": ["null",
-"string"], "name": "library"}, {"default": null, "doc": "", "type":
-["null", "string"], "name": "libraryLayout"}, {"doc": "", "type":
-["null", "string"], "name": "instrumentModel"}, {"default": null,
-"doc": "", "type": ["null", "string"], "name": "instrumentDataFile"},
-{"doc": "", "type": ["null", "string"], "name": "sequencingCenter"},
-{"default": null, "doc": "", "type": ["null", "string"], "name":
-"platformUnit"}, {"default": {}, "doc": "", "type": {"values":
-{"items": "string", "type": "array"}, "type": "map"}, "name":
-"info"}]}], "name": "experiment"}, {"default": null, "doc": "",
-"type": ["null", "int"], "name": "predictedInsertSize"}, {"default":
-null, "doc": "", "type": ["null", "long"], "name": "created"},
-{"default": null, "doc": "", "type": ["null", "long"], "name":
-"updated"}, {"default": null, "doc": "", "type": ["null",
-"ReadStats"], "name": "stats"}, {"default": [], "doc": "", "type":
-{"items": {"doc": "", "type": "record", "name": "Program", "fields":
-[{"default": null, "doc": "", "type": ["null", "string"], "name":
-"commandLine"}, {"default": null, "doc": "", "type": ["null",
-"string"], "name": "id"}, {"default": null, "doc": "", "type":
-["null", "string"], "name": "name"}, {"default": null, "doc": "",
-"type": ["null", "string"], "name": "prevProgramId"}, {"default":
-null, "doc": "", "type": ["null", "string"], "name": "version"}]},
-"type": "array"}, "name": "programs"}, {"default": null, "doc": "",
-"type": ["null", "string"], "name": "referenceSetId"}, {"default": {},
-"doc": "", "type": {"values": {"items": "string", "type": "array"},
-"type": "map"}, "name": "info"}]}, "type": "array"}, "name":
-"readGroups"}], "doc": ""}
+"version"}]}, "type": "array"}, "name": "programs"}, {"default": null,
+"doc": "", "type": ["null", "string"], "name": "referenceSetId"},
+{"default": {}, "doc": "", "type": {"values": {"items": "string",
+"type": "array"}, "type": "map"}, "name": "info"}]}, "type": "array"},
+"name": "readGroups"}], "doc": ""}
 """
     schema = avro.schema.parse(_schemaSource)
     requiredFields = set([
@@ -1950,6 +2054,115 @@ class ReferenceSet(ProtocolElement):
         """
 
 
+class SearchBioSamplesRequest(SearchRequest):
+    """
+    This request maps to the body of POST /biosamples/search as JSON.
+    """
+    _schemaSource = """
+{"namespace": "org.ga4gh.methods", "type": "record", "name":
+"SearchBioSamplesRequest", "fields": [{"type": "string", "name":
+"datasetId"}, {"default": null, "type": ["null", "string"], "name":
+"name"}, {"default": null, "type": ["null", "int"], "name":
+"pageSize"}, {"default": null, "type": ["null", "string"], "name":
+"pageToken"}], "doc": ""}
+"""
+    schema = avro.schema.parse(_schemaSource)
+    requiredFields = set([
+        "datasetId",
+    ])
+
+    @classmethod
+    def isEmbeddedType(cls, fieldName):
+        embeddedTypes = {}
+        return fieldName in embeddedTypes
+
+    @classmethod
+    def getEmbeddedType(cls, fieldName):
+        embeddedTypes = {}
+
+        return embeddedTypes[fieldName]
+
+    __slots__ = [
+        'datasetId', 'name', 'pageSize', 'pageToken'
+    ]
+
+    def __init__(self, **kwargs):
+        self.datasetId = kwargs.get(
+            'datasetId', None)
+        self.name = kwargs.get(
+            'name', None)
+        self.pageSize = kwargs.get(
+            'pageSize', None)
+        self.pageToken = kwargs.get(
+            'pageToken', None)
+
+
+class SearchBioSamplesResponse(SearchResponse):
+    """
+    This is the response from POST /biosamples/search expressed as
+    JSON.
+    """
+    _schemaSource = """
+{"namespace": "org.ga4gh.methods", "type": "record", "name":
+"SearchBioSamplesResponse", "fields": [{"default": [], "doc": "",
+"type": {"items": {"namespace": "org.ga4gh.models", "type": "record",
+"name": "BioSample", "fields": [{"doc": "", "type": "string", "name":
+"id"}, {"default": null, "doc": "", "type": ["null", "string"],
+"name": "name"}, {"default": null, "doc": "", "type": ["null",
+"string"], "name": "description"}, {"default": null, "doc": "",
+"type": ["null", {"doc": "", "type": "record", "name": "OntologyTerm",
+"fields": [{"doc": "", "type": "string", "name": "id"}, {"default":
+null, "doc": "", "type": ["null", "string"], "name": "term"},
+{"default": null, "doc": "", "type": ["null", "string"], "name":
+"value"}, {"default": null, "doc": "", "type": ["null", "string"],
+"name": "sourceName"}, {"default": null, "doc": "", "type": ["null",
+"string"], "name": "sourceVersion"}]}], "name": "disease"}, {"doc":
+"", "type": "string", "name": "createDateTime"}, {"doc": "", "type":
+"string", "name": "updateDateTime"}, {"default": {}, "doc": "",
+"type": {"values": {"items": "string", "type": "array"}, "type":
+"map"}, "name": "info"}], "doc": ""}, "type": "array"}, "name":
+"biosamples"}, {"default": null, "doc": "", "type": ["null",
+"string"], "name": "nextPageToken"}], "doc": ""}
+"""
+    schema = avro.schema.parse(_schemaSource)
+    requiredFields = set([])
+    _valueListName = "biosamples"
+
+    @classmethod
+    def isEmbeddedType(cls, fieldName):
+        embeddedTypes = {
+            'biosamples': BioSample,
+        }
+        return fieldName in embeddedTypes
+
+    @classmethod
+    def getEmbeddedType(cls, fieldName):
+        embeddedTypes = {
+            'biosamples': BioSample,
+        }
+
+        return embeddedTypes[fieldName]
+
+    __slots__ = [
+        'biosamples', 'nextPageToken'
+    ]
+
+    def __init__(self, **kwargs):
+        self.biosamples = kwargs.get(
+            'biosamples', [])
+        """
+        The list of biosamples.
+        """
+        self.nextPageToken = kwargs.get(
+            'nextPageToken', None)
+        """
+        The continuation token, which is used to page through large
+        result sets.   Provide this value in a subsequent request to
+        return the next page of   results. This field will be empty if
+        there aren't any additional results.
+        """
+
+
 class SearchCallSetsRequest(SearchRequest):
     """
     This request maps to the body of POST /callsets/search as JSON.
@@ -1959,8 +2172,10 @@ class SearchCallSetsRequest(SearchRequest):
 "SearchCallSetsRequest", "fields": [{"doc": "", "type": "string",
 "name": "variantSetId"}, {"default": null, "doc": "", "type": ["null",
 "string"], "name": "name"}, {"default": null, "doc": "", "type":
-["null", "int"], "name": "pageSize"}, {"default": null, "doc": "",
-"type": ["null", "string"], "name": "pageToken"}], "doc": ""}
+["null", "string"], "name": "bioSampleId"}, {"default": null, "doc":
+"", "type": ["null", "int"], "name": "pageSize"}, {"default": null,
+"doc": "", "type": ["null", "string"], "name": "pageToken"}], "doc":
+""}
 """
     schema = avro.schema.parse(_schemaSource)
     requiredFields = set([
@@ -1979,10 +2194,16 @@ class SearchCallSetsRequest(SearchRequest):
         return embeddedTypes[fieldName]
 
     __slots__ = [
-        'name', 'pageSize', 'pageToken', 'variantSetId'
+        'bioSampleId', 'name', 'pageSize', 'pageToken', 'variantSetId'
     ]
 
     def __init__(self, **kwargs):
+        self.bioSampleId = kwargs.get(
+            'bioSampleId', None)
+        """
+        Specifying the id of a BioSample record will return   results
+        from the requested sample.
+        """
         self.name = kwargs.get(
             'name', None)
         """
@@ -2021,7 +2242,7 @@ class SearchCallSetsResponse(SearchResponse):
 "name": "CallSet", "fields": [{"doc": "", "type": "string", "name":
 "id"}, {"default": null, "doc": "", "type": ["null", "string"],
 "name": "name"}, {"doc": "", "type": ["null", "string"], "name":
-"sampleId"}, {"default": [], "doc": "", "type": {"items": "string",
+"bioSampleId"}, {"default": [], "doc": "", "type": {"items": "string",
 "type": "array"}, "name": "variantSetIds"}, {"default": null, "doc":
 "", "type": ["null", "long"], "name": "created"}, {"default": null,
 "doc": "", "type": ["null", "long"], "name": "updated"}, {"default":
@@ -2258,44 +2479,44 @@ class SearchReadGroupSetsResponse(SearchResponse):
 "string"], "name": "datasetId"}, {"default": null, "doc": "", "type":
 ["null", "string"], "name": "name"}, {"default": null, "doc": "",
 "type": ["null", "string"], "name": "description"}, {"doc": "",
-"type": ["null", "string"], "name": "sampleId"}, {"doc": "", "type":
-["null", {"doc": "", "type": "record", "name": "Experiment", "fields":
-[{"doc": "", "type": "string", "name": "id"}, {"default": null, "doc":
+"type": ["null", "string"], "name": "bioSampleId"}, {"doc": "",
+"type": ["null", {"doc": "", "type": "record", "name": "Experiment",
+"fields": [{"doc": "", "type": "string", "name": "id"}, {"default":
+null, "doc": "", "type": ["null", "string"], "name": "name"},
+{"default": null, "doc": "", "type": ["null", "string"], "name":
+"description"}, {"doc": "", "type": "string", "name":
+"createDateTime"}, {"doc": "", "type": "string", "name":
+"updateDateTime"}, {"default": null, "doc": "", "type": ["null",
+"string"], "name": "runTime"}, {"default": null, "doc": "", "type":
+["null", "string"], "name": "molecule"}, {"default": null, "doc": "",
+"type": ["null", "string"], "name": "strategy"}, {"default": null,
+"doc": "", "type": ["null", "string"], "name": "selection"},
+{"default": null, "doc": "", "type": ["null", "string"], "name":
+"library"}, {"default": null, "doc": "", "type": ["null", "string"],
+"name": "libraryLayout"}, {"doc": "", "type": ["null", "string"],
+"name": "instrumentModel"}, {"default": null, "doc": "", "type":
+["null", "string"], "name": "instrumentDataFile"}, {"doc": "", "type":
+["null", "string"], "name": "sequencingCenter"}, {"default": null,
+"doc": "", "type": ["null", "string"], "name": "platformUnit"},
+{"default": {}, "doc": "", "type": {"values": {"items": "string",
+"type": "array"}, "type": "map"}, "name": "info"}]}], "name":
+"experiment"}, {"default": null, "doc": "", "type": ["null", "int"],
+"name": "predictedInsertSize"}, {"default": null, "doc": "", "type":
+["null", "long"], "name": "created"}, {"default": null, "doc": "",
+"type": ["null", "long"], "name": "updated"}, {"default": null, "doc":
+"", "type": ["null", "ReadStats"], "name": "stats"}, {"default": [],
+"doc": "", "type": {"items": {"doc": "", "type": "record", "name":
+"Program", "fields": [{"default": null, "doc": "", "type": ["null",
+"string"], "name": "commandLine"}, {"default": null, "doc": "",
+"type": ["null", "string"], "name": "id"}, {"default": null, "doc":
 "", "type": ["null", "string"], "name": "name"}, {"default": null,
-"doc": "", "type": ["null", "string"], "name": "description"}, {"doc":
-"", "type": "string", "name": "createDateTime"}, {"doc": "", "type":
-"string", "name": "updateDateTime"}, {"default": null, "doc": "",
-"type": ["null", "string"], "name": "runTime"}, {"default": null,
-"doc": "", "type": ["null", "string"], "name": "molecule"},
+"doc": "", "type": ["null", "string"], "name": "prevProgramId"},
 {"default": null, "doc": "", "type": ["null", "string"], "name":
-"strategy"}, {"default": null, "doc": "", "type": ["null", "string"],
-"name": "selection"}, {"default": null, "doc": "", "type": ["null",
-"string"], "name": "library"}, {"default": null, "doc": "", "type":
-["null", "string"], "name": "libraryLayout"}, {"doc": "", "type":
-["null", "string"], "name": "instrumentModel"}, {"default": null,
-"doc": "", "type": ["null", "string"], "name": "instrumentDataFile"},
-{"doc": "", "type": ["null", "string"], "name": "sequencingCenter"},
-{"default": null, "doc": "", "type": ["null", "string"], "name":
-"platformUnit"}, {"default": {}, "doc": "", "type": {"values":
-{"items": "string", "type": "array"}, "type": "map"}, "name":
-"info"}]}], "name": "experiment"}, {"default": null, "doc": "",
-"type": ["null", "int"], "name": "predictedInsertSize"}, {"default":
-null, "doc": "", "type": ["null", "long"], "name": "created"},
-{"default": null, "doc": "", "type": ["null", "long"], "name":
-"updated"}, {"default": null, "doc": "", "type": ["null",
-"ReadStats"], "name": "stats"}, {"default": [], "doc": "", "type":
-{"items": {"doc": "", "type": "record", "name": "Program", "fields":
-[{"default": null, "doc": "", "type": ["null", "string"], "name":
-"commandLine"}, {"default": null, "doc": "", "type": ["null",
-"string"], "name": "id"}, {"default": null, "doc": "", "type":
-["null", "string"], "name": "name"}, {"default": null, "doc": "",
-"type": ["null", "string"], "name": "prevProgramId"}, {"default":
-null, "doc": "", "type": ["null", "string"], "name": "version"}]},
-"type": "array"}, "name": "programs"}, {"default": null, "doc": "",
-"type": ["null", "string"], "name": "referenceSetId"}, {"default": {},
-"doc": "", "type": {"values": {"items": "string", "type": "array"},
-"type": "map"}, "name": "info"}]}, "type": "array"}, "name":
-"readGroups"}], "doc": ""}, "type": "array"}, "name":
+"version"}]}, "type": "array"}, "name": "programs"}, {"default": null,
+"doc": "", "type": ["null", "string"], "name": "referenceSetId"},
+{"default": {}, "doc": "", "type": {"values": {"items": "string",
+"type": "array"}, "type": "map"}, "name": "info"}]}, "type": "array"},
+"name": "readGroups"}], "doc": ""}, "type": "array"}, "name":
 "readGroupSets"}, {"default": null, "doc": "", "type": ["null",
 "string"], "name": "nextPageToken"}], "doc": ""}
 """
@@ -2353,9 +2574,10 @@ class SearchReadsRequest(SearchRequest):
 "doc": "", "type": ["null", "string"], "name": "referenceId"},
 {"default": null, "doc": "", "type": ["null", "long"], "name":
 "start"}, {"default": null, "doc": "", "type": ["null", "long"],
-"name": "end"}, {"default": null, "doc": "", "type": ["null", "int"],
-"name": "pageSize"}, {"default": null, "doc": "", "type": ["null",
-"string"], "name": "pageToken"}], "doc": ""}
+"name": "end"}, {"default": null, "doc": "", "type": ["null",
+"string"], "name": "bioSampleId"}, {"default": null, "doc": "",
+"type": ["null", "int"], "name": "pageSize"}, {"default": null, "doc":
+"", "type": ["null", "string"], "name": "pageToken"}], "doc": ""}
 """
     schema = avro.schema.parse(_schemaSource)
     requiredFields = set([
@@ -2374,11 +2596,17 @@ class SearchReadsRequest(SearchRequest):
         return embeddedTypes[fieldName]
 
     __slots__ = [
-        'end', 'pageSize', 'pageToken', 'readGroupIds', 'referenceId',
-        'start'
+        'bioSampleId', 'end', 'pageSize', 'pageToken', 'readGroupIds',
+        'referenceId', 'start'
     ]
 
     def __init__(self, **kwargs):
+        self.bioSampleId = kwargs.get(
+            'bioSampleId', None)
+        """
+        Specifying the id of a BioSample record will return   results
+        from the requested sample.
+        """
         self.end = kwargs.get(
             'end', None)
         """
@@ -2911,11 +3139,12 @@ null, "doc": "", "type": ["null", "string"], "name": "referenceId"},
 "OntologyTerm", "fields": [{"doc": "", "type": "string", "name":
 "id"}, {"default": null, "doc": "", "type": ["null", "string"],
 "name": "term"}, {"default": null, "doc": "", "type": ["null",
-"string"], "name": "sourceName"}, {"default": null, "doc": "", "type":
-["null", "string"], "name": "sourceVersion"}], "doc": ""}, "type":
-"array"}], "name": "effects"}, {"default": null, "doc": "", "type":
-["null", "int"], "name": "pageSize"}, {"default": null, "doc": "",
-"type": ["null", "string"], "name": "pageToken"}], "doc": ""}
+"string"], "name": "value"}, {"default": null, "doc": "", "type":
+["null", "string"], "name": "sourceName"}, {"default": null, "doc":
+"", "type": ["null", "string"], "name": "sourceVersion"}], "doc": ""},
+"type": "array"}], "name": "effects"}, {"default": null, "doc": "",
+"type": ["null", "int"], "name": "pageSize"}, {"default": null, "doc":
+"", "type": ["null", "string"], "name": "pageToken"}], "doc": ""}
 """
     schema = avro.schema.parse(_schemaSource)
     requiredFields = set([
@@ -3028,13 +3257,14 @@ null, "doc": "", "type": ["null", "string"], "name":
 "record", "name": "OntologyTerm", "fields": [{"doc": "", "type":
 "string", "name": "id"}, {"default": null, "doc": "", "type": ["null",
 "string"], "name": "term"}, {"default": null, "doc": "", "type":
-["null", "string"], "name": "sourceName"}, {"default": null, "doc":
-"", "type": ["null", "string"], "name": "sourceVersion"}]}, "type":
-"array"}, "name": "effects"}, {"doc": "", "type": {"doc": "", "type":
-"record", "name": "HGVSAnnotation", "fields": [{"default": null,
-"type": ["null", "string"], "name": "genomic"}, {"default": null,
-"type": ["null", "string"], "name": "transcript"}, {"default": null,
-"type": ["null", "string"], "name": "protein"}]}, "name":
+["null", "string"], "name": "value"}, {"default": null, "doc": "",
+"type": ["null", "string"], "name": "sourceName"}, {"default": null,
+"doc": "", "type": ["null", "string"], "name": "sourceVersion"}]},
+"type": "array"}, "name": "effects"}, {"doc": "", "type": {"doc": "",
+"type": "record", "name": "HGVSAnnotation", "fields": [{"default":
+null, "type": ["null", "string"], "name": "genomic"}, {"default":
+null, "type": ["null", "string"], "name": "transcript"}, {"default":
+null, "type": ["null", "string"], "name": "protein"}]}, "name":
 "hgvsAnnotation"}, {"default": null, "doc": "", "type": ["null",
 {"doc": "", "type": "record", "name": "AlleleLocation", "fields":
 [{"doc": "", "type": "int", "name": "start"}, {"default": null, "doc":
@@ -3401,13 +3631,14 @@ null, "doc": "", "type": ["null", "string"], "name":
 "record", "name": "OntologyTerm", "fields": [{"doc": "", "type":
 "string", "name": "id"}, {"default": null, "doc": "", "type": ["null",
 "string"], "name": "term"}, {"default": null, "doc": "", "type":
-["null", "string"], "name": "sourceName"}, {"default": null, "doc":
-"", "type": ["null", "string"], "name": "sourceVersion"}]}, "type":
-"array"}, "name": "effects"}, {"doc": "", "type": {"doc": "", "type":
-"record", "name": "HGVSAnnotation", "fields": [{"default": null,
-"type": ["null", "string"], "name": "genomic"}, {"default": null,
-"type": ["null", "string"], "name": "transcript"}, {"default": null,
-"type": ["null", "string"], "name": "protein"}]}, "name":
+["null", "string"], "name": "value"}, {"default": null, "doc": "",
+"type": ["null", "string"], "name": "sourceName"}, {"default": null,
+"doc": "", "type": ["null", "string"], "name": "sourceVersion"}]},
+"type": "array"}, "name": "effects"}, {"doc": "", "type": {"doc": "",
+"type": "record", "name": "HGVSAnnotation", "fields": [{"default":
+null, "type": ["null", "string"], "name": "genomic"}, {"default":
+null, "type": ["null", "string"], "name": "transcript"}, {"default":
+null, "type": ["null", "string"], "name": "protein"}]}, "name":
 "hgvsAnnotation"}, {"default": null, "doc": "", "type": ["null",
 {"doc": "", "type": "record", "name": "AlleleLocation", "fields":
 [{"doc": "", "type": "int", "name": "start"}, {"default": null, "doc":
@@ -3673,30 +3904,31 @@ class VariantAnnotation(ProtocolElement):
 "type": "record", "name": "OntologyTerm", "fields": [{"doc": "",
 "type": "string", "name": "id"}, {"default": null, "doc": "", "type":
 ["null", "string"], "name": "term"}, {"default": null, "doc": "",
-"type": ["null", "string"], "name": "sourceName"}, {"default": null,
-"doc": "", "type": ["null", "string"], "name": "sourceVersion"}]},
-"type": "array"}, "name": "effects"}, {"doc": "", "type": {"doc": "",
-"type": "record", "name": "HGVSAnnotation", "fields": [{"default":
-null, "type": ["null", "string"], "name": "genomic"}, {"default":
-null, "type": ["null", "string"], "name": "transcript"}, {"default":
-null, "type": ["null", "string"], "name": "protein"}]}, "name":
-"hgvsAnnotation"}, {"default": null, "doc": "", "type": ["null",
-{"doc": "", "type": "record", "name": "AlleleLocation", "fields":
-[{"doc": "", "type": "int", "name": "start"}, {"default": null, "doc":
-"", "type": ["null", "int"], "name": "end"}, {"default": null, "doc":
-"", "type": ["null", "string"], "name": "referenceSequence"},
-{"default": null, "doc": "", "type": ["null", "string"], "name":
-"alternateSequence"}]}], "name": "cDNALocation"}, {"default": null,
-"type": ["null", "AlleleLocation"], "name": "CDSLocation"},
-{"default": null, "doc": "", "type": ["null", "AlleleLocation"],
-"name": "proteinLocation"}, {"doc": "", "type": {"items": {"doc": "",
-"type": "record", "name": "AnalysisResult", "fields": [{"doc": "",
-"type": "string", "name": "analysisId"}, {"doc": "", "type": ["null",
-"string"], "name": "result"}, {"doc": "", "type": ["null", "int"],
-"name": "score"}]}, "type": "array"}, "name": "analysisResults"}]},
-"type": "array"}, "name": "transcriptEffects"}, {"default": {}, "doc":
-"", "type": {"values": {"items": "string", "type": "array"}, "type":
-"map"}, "name": "info"}], "doc": ""}
+"type": ["null", "string"], "name": "value"}, {"default": null, "doc":
+"", "type": ["null", "string"], "name": "sourceName"}, {"default":
+null, "doc": "", "type": ["null", "string"], "name":
+"sourceVersion"}]}, "type": "array"}, "name": "effects"}, {"doc": "",
+"type": {"doc": "", "type": "record", "name": "HGVSAnnotation",
+"fields": [{"default": null, "type": ["null", "string"], "name":
+"genomic"}, {"default": null, "type": ["null", "string"], "name":
+"transcript"}, {"default": null, "type": ["null", "string"], "name":
+"protein"}]}, "name": "hgvsAnnotation"}, {"default": null, "doc": "",
+"type": ["null", {"doc": "", "type": "record", "name":
+"AlleleLocation", "fields": [{"doc": "", "type": "int", "name":
+"start"}, {"default": null, "doc": "", "type": ["null", "int"],
+"name": "end"}, {"default": null, "doc": "", "type": ["null",
+"string"], "name": "referenceSequence"}, {"default": null, "doc": "",
+"type": ["null", "string"], "name": "alternateSequence"}]}], "name":
+"cDNALocation"}, {"default": null, "type": ["null", "AlleleLocation"],
+"name": "CDSLocation"}, {"default": null, "doc": "", "type": ["null",
+"AlleleLocation"], "name": "proteinLocation"}, {"doc": "", "type":
+{"items": {"doc": "", "type": "record", "name": "AnalysisResult",
+"fields": [{"doc": "", "type": "string", "name": "analysisId"},
+{"doc": "", "type": ["null", "string"], "name": "result"}, {"doc": "",
+"type": ["null", "int"], "name": "score"}]}, "type": "array"}, "name":
+"analysisResults"}]}, "type": "array"}, "name": "transcriptEffects"},
+{"default": {}, "doc": "", "type": {"values": {"items": "string",
+"type": "array"}, "type": "map"}, "name": "info"}], "doc": ""}
 """
     schema = avro.schema.parse(_schemaSource)
     requiredFields = set([
@@ -3995,7 +4227,10 @@ class VariantSetMetadata(ProtocolElement):
         """
 
 postMethods = \
-    [('/callsets/search',
+    [('/biosamples/search',
+      SearchBioSamplesRequest,
+      SearchBioSamplesResponse),
+     ('/callsets/search',
       SearchCallSetsRequest,
       SearchCallSetsResponse),
      ('/datasets/search',
