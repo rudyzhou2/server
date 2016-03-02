@@ -8,6 +8,7 @@ from __future__ import unicode_literals
 
 import datetime
 import random
+import os
 
 import pysam
 
@@ -316,7 +317,7 @@ class AbstractReadGroup(datamodel.DatamodelObject):
         readGroup.programs = []
         referenceSet = self._parentContainer.getReferenceSet()
         readGroup.referenceSetId = None
-        readGroup.sampleId = self.getSampleId()
+        readGroup.bioSampleId = self.getBioSampleId()
         if referenceSet is not None:
             readGroup.referenceSetId = referenceSet.getId()
         stats = protocol.ReadStats()
@@ -379,7 +380,7 @@ class AbstractReadGroup(datamodel.DatamodelObject):
         """
         raise NotImplementedError()
 
-    def getSampleId(self):
+    def getBioSampleId(self):
         """
         Returns the sample id of the read group
         """
@@ -501,7 +502,7 @@ class SimulatedReadGroup(AbstractReadGroup):
     def getDescription(self):
         return None
 
-    def getSampleId(self):
+    def getBioSampleId(self):
         return 'sampleId'
 
     def getPredictedInsertSize(self):
@@ -526,13 +527,15 @@ class SimulatedReadGroup(AbstractReadGroup):
         return None
 
 
-class HtslibReadGroup(datamodel.PysamDatamodelMixin, AbstractReadGroup):
+class HtslibReadGroup(datamodel.PysamDatamodelMixin, AbstractReadGroup, datamodel.MetadataSidecarMixin):
     """
     A readgroup based on htslib's reading of a given file
     """
     def __init__(self, parentContainer, localId, readGroupHeader=None):
         super(HtslibReadGroup, self).__init__(parentContainer, localId)
+        self.loadSidecar(parentContainer.getSamFilePath())
         self._parentSamFilePath = parentContainer.getSamFilePath()
+        print(localId, parentContainer.getSamFilePath())
         self._filterReads = not parentContainer.isUsingDefaultReadGroup()
         self._sampleId = None
         self._description = None
@@ -666,8 +669,11 @@ class HtslibReadGroup(datamodel.PysamDatamodelMixin, AbstractReadGroup):
     def getDescription(self):
         return self._description
 
-    def getSampleId(self):
-        return self._sampleId
+    def getBioSampleId(self):
+        if self.sidecar('bioSampleId'):
+            return self.sidecar('bioSampleId') + self._sampleId
+        else:
+            return self._sampleId
 
     def getPredictedInsertSize(self):
         return self._predictedInsertSize
