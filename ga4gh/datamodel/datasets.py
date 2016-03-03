@@ -12,6 +12,7 @@ import os
 import ga4gh.datamodel as datamodel
 import ga4gh.datamodel.reads as reads
 import ga4gh.datamodel.variants as variants
+import ga4gh.datamodel.biodata as biodata
 import ga4gh.exceptions as exceptions
 import ga4gh.protocol as protocol
 
@@ -31,7 +32,15 @@ class AbstractDataset(datamodel.DatamodelObject):
         self._readGroupSetNameMap = {}
         self._variantAnnotationSetIds = []
         self._variantAnnotationSetIdMap = {}
+        self._bioSampleIds = []
+        self._bioSampleIdMap = {}
+        self._bioSampleNameMap = {}
         self._description = None
+
+    def addBioSample(self, bioSample):
+        id_ = bioSample.getId()
+        self._bioSampleIdMap[id_] = bioSample
+        self._bioSampleIds.append(id_)
 
     def addVariantSet(self, variantSet):
         """
@@ -107,6 +116,23 @@ class AbstractDataset(datamodel.DatamodelObject):
             raise exceptions.VariantSetNotFoundException(id_)
         return self._variantSetIdMap[id_]
 
+    def getBioSample(self, id_):
+        """
+        Returns the VariantSet with the specified name, or raises a
+        VariantSetNotFoundException otherwise.
+        """
+        if id_ not in self._bioSampleIdMap:
+            # TODO different exception
+            raise exceptions.VariantSetNotFoundException(id_)
+        return self._bioSampleIdMap[id_]
+
+    def getBioSampleByIndex(self, index):
+        """
+        Returns the VariantSet with the specified name, or raises a
+        VariantSetNotFoundException otherwise.
+        """
+        return self._bioSampleIdMap[self._bioSampleIds[index]]
+
     def getVariantSetByIndex(self, index):
         """
         Returns the variant set at the specified index in this dataset.
@@ -120,6 +146,16 @@ class AbstractDataset(datamodel.DatamodelObject):
         """
         return self._variantAnnotationSetIdMap[
             self._variantAnnotationSetIds[index]]
+
+    def getBioSampleByName(self, name):
+        """
+        Returns a ReadGroupSet with the specified name, or raises a
+        ReadGroupSetNameNotFoundException if it does not exist.
+        """
+        if name not in self._bioSampleNameMap:
+            # TODO different exception
+            raise exceptions.ReadGroupSetNameNotFoundException(name)
+        return self._bioSampleNameMap[name]
 
     def getNumReadGroupSets(self):
         """
@@ -201,6 +237,7 @@ class FileSystemDataset(AbstractDataset):
     """
     variantsDirName = "variants"
     readsDirName = "reads"
+    bioSampleDirName = "biodata/biosamples"
 
     def __init__(self, localId, dataDir, dataRepository):
         super(FileSystemDataset, self).__init__(localId)
@@ -231,6 +268,17 @@ class FileSystemDataset(AbstractDataset):
                 readGroupSet = reads.HtslibReadGroupSet(
                     self, localId, bamPath, dataRepository)
                 self.addReadGroupSet(readGroupSet)
+
+        #BioSamples
+        bioSamplesDir = os.path.join(dataDir, self.bioSampleDirName)
+        for filename in os.listdir(bioSamplesDir):
+            if fnmatch.fnmatch(filename, '*.json'):
+                print("LOADING THEM JSON")
+                print(filename)
+                localId, _ = os.path.splitext(filename)
+                bioSample = biodata.JsonBioSample(
+                    self, localId, filename)
+                self.addBioSample(bioSample)
 
     def _setMetadata(self):
         metadataFileName = '{}.json'.format(self._dataDir)
