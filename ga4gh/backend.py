@@ -440,6 +440,13 @@ class Backend(object):
             return self._topLevelObjectGenerator(
                 request, dataset.getNumBioSamples(),
                 dataset.getBioSampleByIndex)
+        else:
+            try:
+                bioSample = dataset.getBioSampleByName(request.name)
+                # TODO NEW exception
+            except exceptions.ReadGroupSetNameNotFoundException:
+                return self._noObjectGenerator()
+            return self._singleObjectGenerator(bioSample)
 
     def readGroupSetsGenerator(self, request):
         """

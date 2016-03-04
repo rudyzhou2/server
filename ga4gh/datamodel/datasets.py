@@ -41,6 +41,7 @@ class AbstractDataset(datamodel.DatamodelObject):
         id_ = bioSample.getId()
         self._bioSampleIdMap[id_] = bioSample
         self._bioSampleIds.append(id_)
+        self._bioSampleNameMap[bioSample.getName()] = bioSample
 
     def addVariantSet(self, variantSet):
         """
