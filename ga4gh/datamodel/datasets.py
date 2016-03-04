@@ -163,6 +163,12 @@ class AbstractDataset(datamodel.DatamodelObject):
         """
         return len(self._readGroupSetIds)
 
+    def getNumBioSamples(self):
+        """
+        Returns the number of readgroup sets in this dataset.
+        """
+        return len(self._bioSampleIds)
+
     def getReadGroupSets(self):
         """
         Returns the list of ReadGroupSets in this dataset
@@ -273,11 +279,10 @@ class FileSystemDataset(AbstractDataset):
         bioSamplesDir = os.path.join(dataDir, self.bioSampleDirName)
         for filename in os.listdir(bioSamplesDir):
             if fnmatch.fnmatch(filename, '*.json'):
-                print("LOADING THEM JSON")
-                print(filename)
+                filepath = os.path.join(bioSamplesDir, filename)
                 localId, _ = os.path.splitext(filename)
                 bioSample = biodata.JsonBioSample(
-                    self, localId, filename)
+                    self, localId, filepath)
                 self.addBioSample(bioSample)
 
     def _setMetadata(self):

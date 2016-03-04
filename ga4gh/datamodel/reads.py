@@ -527,15 +527,13 @@ class SimulatedReadGroup(AbstractReadGroup):
         return None
 
 
-class HtslibReadGroup(datamodel.PysamDatamodelMixin, AbstractReadGroup, datamodel.MetadataSidecarMixin):
+class HtslibReadGroup(datamodel.PysamDatamodelMixin, AbstractReadGroup):
     """
     A readgroup based on htslib's reading of a given file
     """
     def __init__(self, parentContainer, localId, readGroupHeader=None):
         super(HtslibReadGroup, self).__init__(parentContainer, localId)
-        self.loadSidecar(parentContainer.getSamFilePath())
         self._parentSamFilePath = parentContainer.getSamFilePath()
-        print(localId, parentContainer.getSamFilePath())
         self._filterReads = not parentContainer.isUsingDefaultReadGroup()
         self._sampleId = None
         self._description = None
@@ -670,10 +668,10 @@ class HtslibReadGroup(datamodel.PysamDatamodelMixin, AbstractReadGroup, datamode
         return self._description
 
     def getBioSampleId(self):
-        if self.sidecar('bioSampleId'):
-            return self.sidecar('bioSampleId') + self._sampleId
-        else:
-            return self._sampleId
+        datasetId = self.getParentContainer(
+            ).getParentContainer().getCompoundId()
+        compoundId = datamodel.BioSampleCompoundId(datasetId, self._sampleId)
+        return str(compoundId)
 
     def getPredictedInsertSize(self):
         return self._predictedInsertSize

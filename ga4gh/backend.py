@@ -434,6 +434,13 @@ class Backend(object):
             request, self.getDataRepository().getNumDatasets(),
             self.getDataRepository().getDatasetByIndex)
 
+    def bioSamplesGenerator(self, request):
+        dataset = self.getDataRepository().getDataset(request.datasetId)
+        if request.name is None:
+            return self._topLevelObjectGenerator(
+                request, dataset.getNumBioSamples(),
+                dataset.getBioSampleByIndex)
+
     def readGroupSetsGenerator(self, request):
         """
         Returns a generator over the (readGroupSet, nextPageToken) pairs
@@ -736,6 +743,15 @@ class Backend(object):
         variantSet = dataset.getVariantSet(id_)
         return self.runGetRequest(variantSet)
 
+    def runGetBioSample(self, id_):
+        """
+        Runs a getVariantSet request for the specified ID.
+        """
+        compoundId = datamodel.BioSampleCompoundId.parse(id_)
+        dataset = self.getDataRepository().getDataset(compoundId.datasetId)
+        bioSample = dataset.getBioSample(id_)
+        return self.runGetRequest(bioSample)
+
     def runGetDataset(self, id_):
         """
         Runs a getDataset request for the specified ID.
@@ -762,6 +778,15 @@ class Backend(object):
             request, protocol.SearchReadGroupSetsRequest,
             protocol.SearchReadGroupSetsResponse,
             self.readGroupSetsGenerator)
+
+    def runSearchBioSamples(self, request):
+        """
+        Runs the specified SearchReadsRequest.
+        """
+        return self.runSearchRequest(
+            request, protocol.SearchBioSamplesRequest,
+            protocol.SearchBioSamplesResponse,
+            self.bioSamplesGenerator)
 
     def runSearchReads(self, request):
         """

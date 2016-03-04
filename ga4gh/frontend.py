@@ -526,6 +526,19 @@ def searchDatasets():
         flask.request, app.backend.runSearchDatasets)
 
 
+@DisplayedRoute('/biosamples/search', postMethod=True)
+def searchBioSamples():
+    return handleFlaskPostRequest(
+        flask.request, app.backend.runSearchBioSamples)
+
+
+@DisplayedRoute(
+    '/biosamples/<no(search):id>',
+    pathDisplay='/biosamples/<id>')
+def getBioSample(id):
+    return handleFlaskGetRequest(
+        id, flask.request, app.backend.runGetBioSample)
+
 @DisplayedRoute(
     '/variantsets/<no(search):id>',
     pathDisplay='/variantsets/<id>')
