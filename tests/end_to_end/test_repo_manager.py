@@ -11,7 +11,7 @@ import shutil
 import tempfile
 import unittest
 
-import ga4gh.cli as cli
+import ga4gh.repo_manager as cli
 import ga4gh.exceptions as exceptions
 import tests.paths as paths
 

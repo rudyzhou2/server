@@ -155,9 +155,6 @@ class ReadGroupSetTest(datadriven.DataDrivenTest):
             readGroupInfo = self._readGroupInfos[readGroup.getLocalId()]
             gaReadGroup = readGroup.toProtocolElement()
             self.assertEqual(
-                readGroupInfo.sampleId,
-                gaReadGroup.sampleId)
-            self.assertEqual(
                 readGroupInfo.predictedInsertSize,
                 gaReadGroup.predictedInsertSize)
             self.assertEqual(

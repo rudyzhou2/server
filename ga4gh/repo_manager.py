@@ -71,6 +71,8 @@ class RepoManager(object):
         datarepo.FileSystemDataRepository.referenceSetsDirName
     readsDirName = datasets.FileSystemDataset.readsDirName
     variantsDirName = datasets.FileSystemDataset.variantsDirName
+    bioDataDirName = datasets.FileSystemDataset.bioDataDirName
+    bioSamplesDirName = datasets.FileSystemDataset.bioSamplesDirName
     fastaExtension = '.fa.gz'
     fastaIndexExtensionFai = '.fa.gz.fai'
     fastaIndexExtensionGzi = '.fa.gz.gzi'
@@ -87,7 +89,7 @@ class RepoManager(object):
             self.ontologiesDirName,
             self.referenceSetsDirName]
         self._datasetStructure = [
-            self.readsDirName, self.variantsDirName]
+            self.readsDirName, self.variantsDirName, self.bioDataDirName, self.bioSamplesDirName]
 
     def _assertFileExists(
             self, filePath, text='File', inRepo=False, emitName=None):

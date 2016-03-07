@@ -10,6 +10,7 @@ import mock
 import unittest
 
 import ga4gh.cli as cli
+import ga4gh.repo_manager as repo_manager
 import ga4gh.protocol as protocol
 
 
@@ -236,7 +237,7 @@ class TestClientArguments(unittest.TestCase):
 class TestRepoManagerCli(unittest.TestCase):
 
     def setUp(self):
-        self.parser = cli.getRepoParser()
+        self.parser = repo_manager.getRepoParser()
         self.repoPath = 'a/repo/path'
         self.datasetName = "datasetName"
         self.filePath = 'a/file/path'
@@ -245,25 +246,25 @@ class TestRepoManagerCli(unittest.TestCase):
         cliInput = "init {}".format(self.repoPath)
         args = self.parser.parse_args(cliInput.split())
         self.assertEquals(args.repoPath, self.repoPath)
-        self.assertEquals(args.runner, cli.InitRunner)
+        self.assertEquals(args.runner, repo_manager.InitRunner)
 
     def testCheck(self):
         cliInput = "check {}".format(self.repoPath)
         args = self.parser.parse_args(cliInput.split())
         self.assertEquals(args.repoPath, self.repoPath)
-        self.assertEquals(args.runner, cli.CheckRunner)
+        self.assertEquals(args.runner, repo_manager.CheckRunner)
 
     def testList(self):
         cliInput = "list {}".format(self.repoPath)
         args = self.parser.parse_args(cliInput.split())
         self.assertEquals(args.repoPath, self.repoPath)
-        self.assertEquals(args.runner, cli.ListRunner)
+        self.assertEquals(args.runner, repo_manager.ListRunner)
 
     def testDestroy(self):
         cliInput = "destroy {} --force".format(self.repoPath)
         args = self.parser.parse_args(cliInput.split())
         self.assertEquals(args.repoPath, self.repoPath)
-        self.assertEquals(args.runner, cli.DestroyRunner)
+        self.assertEquals(args.runner, repo_manager.DestroyRunner)
         self.assertEquals(args.force, True)
 
     def testAddDataset(self):
@@ -272,7 +273,7 @@ class TestRepoManagerCli(unittest.TestCase):
         args = self.parser.parse_args(cliInput.split())
         self.assertEquals(args.repoPath, self.repoPath)
         self.assertEquals(args.datasetName, self.datasetName)
-        self.assertEquals(args.runner, cli.AddDatasetRunner)
+        self.assertEquals(args.runner, repo_manager.AddDatasetRunner)
 
     def testRemoveDataset(self):
         cliInput = "remove-dataset {} {} -f".format(
@@ -280,7 +281,7 @@ class TestRepoManagerCli(unittest.TestCase):
         args = self.parser.parse_args(cliInput.split())
         self.assertEquals(args.repoPath, self.repoPath)
         self.assertEquals(args.datasetName, self.datasetName)
-        self.assertEquals(args.runner, cli.RemoveDatasetRunner)
+        self.assertEquals(args.runner, repo_manager.RemoveDatasetRunner)
         self.assertEquals(args.force, True)
 
     def testAddReferenceSet(self):
@@ -291,7 +292,7 @@ class TestRepoManagerCli(unittest.TestCase):
         self.assertEquals(args.repoPath, self.repoPath)
         self.assertEquals(args.filePath, self.filePath)
         self.assertEquals(args.description, description)
-        self.assertEquals(args.runner, cli.AddReferenceSetRunner)
+        self.assertEquals(args.runner, repo_manager.AddReferenceSetRunner)
 
     def testRemoveReferenceSet(self):
         referenceSetName = "referenceSetName"
@@ -300,7 +301,7 @@ class TestRepoManagerCli(unittest.TestCase):
         args = self.parser.parse_args(cliInput.split())
         self.assertEquals(args.repoPath, self.repoPath)
         self.assertEquals(args.referenceSetName, referenceSetName)
-        self.assertEquals(args.runner, cli.RemoveReferenceSetRunner)
+        self.assertEquals(args.runner, repo_manager.RemoveReferenceSetRunner)
         self.assertEquals(args.force, True)
 
     def testAddReadGroupSet(self):
@@ -311,7 +312,7 @@ class TestRepoManagerCli(unittest.TestCase):
         self.assertEquals(args.datasetName, self.datasetName)
         self.assertEquals(args.filePath, self.filePath)
         self.assertEquals(args.moveMode, "copy")
-        self.assertEquals(args.runner, cli.AddReadGroupSetRunner)
+        self.assertEquals(args.runner, repo_manager.AddReadGroupSetRunner)
 
     def testRemoveReadGroupSet(self):
         readGroupSetName = "readGroupSetName"
@@ -321,7 +322,7 @@ class TestRepoManagerCli(unittest.TestCase):
         self.assertEquals(args.repoPath, self.repoPath)
         self.assertEquals(args.datasetName, self.datasetName)
         self.assertEquals(args.readGroupSetName, readGroupSetName)
-        self.assertEquals(args.runner, cli.RemoveReadGroupSetRunner)
+        self.assertEquals(args.runner, repo_manager.RemoveReadGroupSetRunner)
         self.assertEquals(args.force, True)
 
     def testAddVariantSet(self):
@@ -332,7 +333,7 @@ class TestRepoManagerCli(unittest.TestCase):
         self.assertEquals(args.datasetName, self.datasetName)
         self.assertEquals(args.filePath, self.filePath)
         self.assertEquals(args.moveMode, "move")
-        self.assertEquals(args.runner, cli.AddVariantSetRunner)
+        self.assertEquals(args.runner, repo_manager.AddVariantSetRunner)
 
     def testRemoveVariantSet(self):
         variantSetName = "variantSetName"
@@ -342,7 +343,7 @@ class TestRepoManagerCli(unittest.TestCase):
         self.assertEquals(args.repoPath, self.repoPath)
         self.assertEquals(args.datasetName, self.datasetName)
         self.assertEquals(args.variantSetName, variantSetName)
-        self.assertEquals(args.runner, cli.RemoveVariantSetRunner)
+        self.assertEquals(args.runner, repo_manager.RemoveVariantSetRunner)
         self.assertEquals(args.force, False)
 
 
