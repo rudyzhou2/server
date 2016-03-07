@@ -41,6 +41,13 @@ class DevelopmentConfig(BaseConfig):
     DATA_SOURCE = "ga4gh-example-data"
     DEBUG = True
 
+class SimulatedConfig(BaseConfig):
+    """
+    Configuration used for development.
+    """
+    DATA_SOURCE = "simulated://"
+    DEBUG = True
+
 
 class LocalOidConfig(DevelopmentConfig):
     """

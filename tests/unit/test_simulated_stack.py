@@ -788,3 +788,19 @@ class TestSimulatedStack(unittest.TestCase):
         request.readGroupIds = [readGroup.getId(), "42"]
         request.referenceId = reference.getId()
         self.verifySearchMethodNotSupported(request, path)
+
+    def testBioSamplesFromReads(self):
+        path = 'readgroupsets/search'
+        dataset = self.dataRepo.getDatasets()[0]
+        # get all the read group sets
+        request = protocol.SearchReadGroupSetsRequest()
+        request.datasetId = dataset.getId()
+        responseData = self.sendSearchRequest(
+            path, request, protocol.SearchReadGroupSetsResponse)
+        # go through each read group
+        for rgs in responseData.readGroupSets:
+            for rg in rgs.readGroups:
+                # request biosample record
+                if rg.bioSampleId:
+                    bioSample = self.sendGetObject('biosamples', rg.bioSampleId, protocol.BioSample())
+                    self.assertNotEqual(None, bioSample, "A BioSample should exist for reach read")

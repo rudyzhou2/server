@@ -224,6 +224,11 @@ class SimulatedDataset(AbstractDataset):
             seed = randomSeed + i
             variantSet = variants.SimulatedVariantSet(
                 self, localId, seed, numCalls, variantDensity)
+            cs = variantSet.getCallSets()
+            # Add biosamples
+            for c in cs:
+                bioSample = datamodel.biodata.AbstractBioSample(self, c.getLocalId())
+                self.addBioSample(bioSample)
             self.addVariantSet(variantSet)
             variantAnnotationSet = variants.SimulatedVariantAnnotationSet(
                 self, "simVas{}".format(i), variantSet)
@@ -235,6 +240,9 @@ class SimulatedDataset(AbstractDataset):
             readGroupSet = reads.SimulatedReadGroupSet(
                 self, localId, referenceSet, seed,
                 numReadGroupsPerReadGroupSet, numAlignments)
+            for rg in readGroupSet.getReadGroups():
+                bioSample = datamodel.biodata.AbstractBioSample(self, rg.getLocalId())
+                self.addBioSample(bioSample)
             self.addReadGroupSet(readGroupSet)
 
 

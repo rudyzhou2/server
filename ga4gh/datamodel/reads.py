@@ -503,7 +503,10 @@ class SimulatedReadGroup(AbstractReadGroup):
         return None
 
     def getBioSampleId(self):
-        return 'sampleId'
+        datasetId = self.getParentContainer(
+            ).getParentContainer().getCompoundId()
+        compoundId = datamodel.BioSampleCompoundId(datasetId, self.getLocalId())
+        return str(compoundId)
 
     def getPredictedInsertSize(self):
         return 0
