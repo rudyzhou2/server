@@ -156,7 +156,14 @@ class ReadsIntervalIterator(IntervalIterator):
         super(ReadsIntervalIterator, self).__init__(request, parentContainer)
 
     def _search(self, start, end):
-        return self._parentContainer.getReadAlignments(
+        readGroup = self._parentContainer
+        if self._request.bioSampleId:
+            if readGroup.toProtocolElement().bioSampleId == self._request.bioSampleId:
+                return readGroup.getReadAlignments(
+                    self._reference, start, end)
+            else:
+                return iter(())
+        return readGroup.getReadAlignments(
             self._reference, start, end)
 
     @classmethod
@@ -587,16 +594,23 @@ class Backend(object):
         compoundId = datamodel.VariantSetCompoundId.parse(request.variantSetId)
         dataset = self.getDataRepository().getDataset(compoundId.datasetId)
         variantSet = dataset.getVariantSet(compoundId.variantSetId)
-        if request.name is None:
-            return self._topLevelObjectGenerator(
-                request, variantSet.getNumCallSets(),
-                variantSet.getCallSetByIndex)
-        else:
+        if request.name and request.name != "":
             try:
                 callSet = variantSet.getCallSetByName(request.name)
             except exceptions.CallSetNameNotFoundException:
                 return self._noObjectGenerator()
             return self._singleObjectGenerator(callSet)
+        elif request.bioSampleId and request.bioSampleId != "":
+            for cs in variantSet._callSetNameMap.values():
+                if cs.toProtocolElement().bioSampleId == request.bioSampleId:
+                    return self._singleObjectGenerator(cs)
+            return self._noObjectGenerator()
+        else:
+            return self._topLevelObjectGenerator(
+                request, variantSet.getNumCallSets(),
+                variantSet.getCallSetByIndex)
+
+
 
     ###########################################################
     #

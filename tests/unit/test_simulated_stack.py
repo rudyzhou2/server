@@ -293,7 +293,7 @@ class TestSimulatedStack(unittest.TestCase):
                 for badId in self.getBadIds():
                     request = protocol.SearchCallSetsRequest()
                     request.variantSetId = variantSet.getId()
-                    request.name = badId
+                    request.name = "A BAD NAME"
                     self.verifySearchResultsEmpty(
                         request, path, protocol.SearchCallSetsResponse)
         # Check for searches within missing variantSets.
@@ -798,9 +798,57 @@ class TestSimulatedStack(unittest.TestCase):
         responseData = self.sendSearchRequest(
             path, request, protocol.SearchReadGroupSetsResponse)
         # go through each read group
+        bioSamples = []
         for rgs in responseData.readGroupSets:
             for rg in rgs.readGroups:
                 # request biosample record
                 if rg.bioSampleId:
                     bioSample = self.sendGetObject('biosamples', rg.bioSampleId, protocol.BioSample())
+                    bioSamples.append(bioSample)
                     self.assertNotEqual(None, bioSample, "A BioSample should exist for reach read")
+    # search reads by biosample
+        path = 'reads/search'
+        readGroupSet = dataset.getReadGroupSets()[0]
+        readGroup = readGroupSet.getReadGroups()[0]
+        reference = readGroupSet.getReferenceSet().getReferences()[0]
+        request = protocol.SearchReadsRequest()
+        # TODO search multiple RG ids
+        request.readGroupIds = [readGroup.getId()]
+        request.referenceId = reference.getId()
+        request.bioSampleId = "A BAD ID"
+        responseData = self.sendSearchRequest(
+            path, request, protocol.SearchReadsResponse)
+        self.assertEqual(responseData.alignments, [])
+        request = protocol.SearchReadsRequest()
+        request.readGroupIds = [readGroup.getId()]
+        request.referenceId = reference.getId()
+        request.bioSampleId = bioSamples[0].id
+        responseData = self.sendSearchRequest(
+            path, request, protocol.SearchReadsResponse)
+        self.assertGreater(len(responseData.alignments), 0)
+        for alignment in responseData.alignments:
+            # The read group for each alignment
+            # has the expected bioSampleId
+            readGroup = self.sendGetObject('readgroups', alignment.readGroupId, protocol.ReadGroup())
+            self.assertEqual(readGroup.bioSampleId, bioSamples[0].id)
+
+    def testBioSamplesFromCallSets(self):
+        path = 'callsets/search'
+        dataset = self.dataRepo.getDatasets()[0]
+        variantSet = dataset.getVariantSets()[0]
+        callSet = variantSet.getCallSets()[0]
+        request = protocol.SearchCallSetsRequest()
+        request.variantSetId = variantSet.getId()
+        request.bioSampleId = "A BAD ID"
+        responseData = self.sendSearchRequest(
+            path, request, protocol.SearchCallSetsResponse)
+        self.assertEqual(len(responseData.callSets), 0)
+
+        request = protocol.SearchCallSetsRequest()
+        request.variantSetId = variantSet.getId()
+        request.bioSampleId = callSet.toProtocolElement().bioSampleId
+        responseData = self.sendSearchRequest(
+            path, request, protocol.SearchCallSetsResponse)
+        self.assertGreater(len(responseData.callSets), 0)
+        for cs in responseData.callSets:
+            self.assertEqual(cs.bioSampleId, request.bioSampleId)
