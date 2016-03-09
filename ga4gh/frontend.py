@@ -539,6 +539,7 @@ def getBioSample(id):
     return handleFlaskGetRequest(
         id, flask.request, app.backend.runGetBioSample)
 
+
 @DisplayedRoute(
     '/variantsets/<no(search):id>',
     pathDisplay='/variantsets/<id>')

@@ -158,7 +158,8 @@ class ReadsIntervalIterator(IntervalIterator):
     def _search(self, start, end):
         readGroup = self._parentContainer
         if self._request.bioSampleId:
-            if readGroup.toProtocolElement().bioSampleId == self._request.bioSampleId:
+            if readGroup.toProtocolElement().bioSampleId == \
+                    self._request.bioSampleId:
                 return readGroup.getReadAlignments(
                     self._reference, start, end)
             else:
@@ -609,8 +610,6 @@ class Backend(object):
             return self._topLevelObjectGenerator(
                 request, variantSet.getNumCallSets(),
                 variantSet.getCallSetByIndex)
-
-
 
     ###########################################################
     #

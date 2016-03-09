@@ -8,7 +8,6 @@ from __future__ import unicode_literals
 
 import datetime
 import random
-import os
 
 import pysam
 
@@ -505,7 +504,8 @@ class SimulatedReadGroup(AbstractReadGroup):
     def getBioSampleId(self):
         datasetId = self.getParentContainer(
             ).getParentContainer().getCompoundId()
-        compoundId = datamodel.BioSampleCompoundId(datasetId, self.getLocalId())
+        compoundId = datamodel.BioSampleCompoundId(
+            datasetId, self.getLocalId())
         return str(compoundId)
 
     def getPredictedInsertSize(self):

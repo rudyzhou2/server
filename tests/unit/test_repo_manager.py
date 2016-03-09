@@ -193,4 +193,3 @@ class RepoManagerInidividualCommandTest(AbstractRepoManagerTest):
         with self.assertRaises(exceptions.RepoManagerException):
             self.repoManager.addBioSample(
                 'dataset1', paths.bioSamplePath, 'link')
-

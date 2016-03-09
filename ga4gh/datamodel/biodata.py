@@ -13,6 +13,7 @@ import ga4gh.protocol as protocol
 
 class AbstractBioSample(datamodel.DatamodelObject):
     compoundIdClass = datamodel.BioSampleCompoundId
+
     def __init__(self, parentContainer, localId):
         super(AbstractBioSample, self).__init__(parentContainer, localId)
         self._createDateTime = datetime.datetime.now().isoformat()
@@ -50,6 +51,7 @@ class AbstractBioSample(datamodel.DatamodelObject):
 
     def getName(self):
         return self._name
+
 
 class JsonBioSample(AbstractBioSample, datamodel.MetadataSidecarMixin):
     def __init__(self, parentContainer, localId, filepath):

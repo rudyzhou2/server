@@ -89,7 +89,10 @@ class RepoManager(object):
             self.ontologiesDirName,
             self.referenceSetsDirName]
         self._datasetStructure = [
-            self.readsDirName, self.variantsDirName, self.bioDataDirName, self.bioSamplesDirName]
+            self.readsDirName,
+            self.variantsDirName,
+            self.bioDataDirName,
+            self.bioSamplesDirName]
 
     def _assertFileExists(
             self, filePath, text='File', inRepo=False, emitName=None):
@@ -149,6 +152,14 @@ class RepoManager(object):
         referenceSetPath = os.path.join(
             self._repoPath, self.referenceSetsDirName, referenceSetName)
         return referenceSetPath
+
+    def _getBioSamplesPath(self, datasetName):
+        bioSamplesPath = os.path.join(
+            self._repoPath,
+            self.datasetsDirName,
+            datasetName,
+            self.bioSamplesDirName)
+        return bioSamplesPath
 
     def _getReferenceSetJsonPath(self, referenceSetName):
         jsonPath = os.path.join(

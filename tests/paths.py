@@ -23,6 +23,8 @@ vcfDirPath = os.path.join(
     testDataDir, 'datasets/dataset1/variants/1kgPhase1')
 vcfDirPath2 = os.path.join(
     testDataDir, 'datasets/dataset1/variants/1kgPhase3')
+bioSamplePath = os.path.join(
+    testDataDir, 'datasets/dataset1/biodata/biosamples/HG00096.json')
 
 # reads
 readGroupSetName = 'chr17.1-250'

@@ -488,6 +488,7 @@ class PysamDatamodelMixin(object):
     def getFileHandle(self, dataFile):
         return fileHandleCache.getFileHandle(dataFile, self.openFile)
 
+
 class MetadataSidecarMixin(object):
     """
     Loads a human readable sidecar and makes its values available as

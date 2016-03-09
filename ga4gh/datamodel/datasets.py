@@ -227,7 +227,8 @@ class SimulatedDataset(AbstractDataset):
             cs = variantSet.getCallSets()
             # Add biosamples
             for c in cs:
-                bioSample = datamodel.biodata.AbstractBioSample(self, c.getLocalId())
+                bioSample = datamodel.biodata.AbstractBioSample(
+                    self, c.getLocalId())
                 self.addBioSample(bioSample)
             self.addVariantSet(variantSet)
             variantAnnotationSet = variants.SimulatedVariantAnnotationSet(
@@ -241,7 +242,8 @@ class SimulatedDataset(AbstractDataset):
                 self, localId, referenceSet, seed,
                 numReadGroupsPerReadGroupSet, numAlignments)
             for rg in readGroupSet.getReadGroups():
-                bioSample = datamodel.biodata.AbstractBioSample(self, rg.getLocalId())
+                bioSample = datamodel.biodata.AbstractBioSample(
+                    self, rg.getLocalId())
                 self.addBioSample(bioSample)
             self.addReadGroupSet(readGroupSet)
 
@@ -285,8 +287,8 @@ class FileSystemDataset(AbstractDataset):
                     self, localId, bamPath, dataRepository)
                 self.addReadGroupSet(readGroupSet)
 
-        #BioSamples
-        bioSamplesDir = os.path.join(dataDir, self.bioSampleDirName)
+        # Biodata
+        bioSamplesDir = os.path.join(dataDir, self.bioSamplesDirName)
         for filename in os.listdir(bioSamplesDir):
             if fnmatch.fnmatch(filename, '*.json'):
                 filepath = os.path.join(bioSamplesDir, filename)

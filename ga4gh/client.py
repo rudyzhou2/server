@@ -105,8 +105,8 @@ class AbstractClient(object):
         :param bioSampleId:
         :return: protocol.BioSample
         """
-        return self._runGetRequest("biosamples", protocol.BioSample, bioSampleId)
-
+        return self._runGetRequest(
+            "biosamples", protocol.BioSample, bioSampleId)
 
     def getPageSize(self):
         """

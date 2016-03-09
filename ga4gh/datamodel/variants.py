@@ -75,7 +75,8 @@ class CallSet(datamodel.DatamodelObject):
     def getBioSampleId(self):
         datasetId = self.getParentContainer(
             ).getParentContainer().getCompoundId()
-        compoundId = datamodel.BioSampleCompoundId(datasetId, self.getLocalId())
+        compoundId = datamodel.BioSampleCompoundId(
+            datasetId, self.getLocalId())
         return str(compoundId)
 
     def getSampleName(self):
