@@ -99,6 +99,15 @@ class AbstractClient(object):
         """
         raise NotImplemented()
 
+    def getBioSample(self, bioSampleId):
+        """
+        Perform a get request for the given BioSample.
+        :param bioSampleId:
+        :return: protocol.BioSample
+        """
+        return self._runGetRequest("biosamples", protocol.BioSample, bioSampleId)
+
+
     def getPageSize(self):
         """
         Returns the suggested maximum size of pages of results returned by
@@ -385,7 +394,7 @@ class AbstractClient(object):
         return self._runSearchRequest(
             request, "references", protocol.SearchReferencesResponse)
 
-    def searchCallSets(self, variantSetId, name=None):
+    def searchCallSets(self, variantSetId, name=None, bioSampleId=None):
         """
         Returns an iterator over the CallSets fulfilling the specified
         conditions from the specified VariantSet.
@@ -398,9 +407,17 @@ class AbstractClient(object):
         request = protocol.SearchCallSetsRequest()
         request.variantSetId = variantSetId
         request.name = name
+        request.bioSampleId = bioSampleId
         request.pageSize = self._pageSize
         return self._runSearchRequest(
             request, "callsets", protocol.SearchCallSetsResponse)
+
+    def searchBioSamples(self, datasetId, name=None, bioSampleId=None):
+        request = protocol.SearchBioSamplesRequest()
+        request.datasetId = datasetId
+        request.name = name
+        return self._runSearchRequest(
+            request, "biosamples", protocol.SearchBioSamplesResponse)
 
     def searchReadGroupSets(self, datasetId, name=None):
         """

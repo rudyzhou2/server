@@ -353,10 +353,11 @@ class SearchCallSetsRunner(AbstractSearchRunner):
         super(SearchCallSetsRunner, self).__init__(args)
         self._variantSetId = args.variantSetId
         self._name = args.name
+        self._bioSampleId = args.bioSampleId
 
     def _run(self, variantSetId):
         iterator = self._client.searchCallSets(
-            variantSetId=variantSetId, name=self._name)
+            variantSetId=variantSetId, name=self._name, bioSampleId=self._bioSampleId)
         self._output(iterator)
 
     def run(self):
@@ -412,6 +413,24 @@ class AnnotationFormatterMixin(object):
                       effect.hgvsAnnotation.protein, sep="|", end="\t")
             print()
 
+class SearchBioSamplesRunner(AbstractSearchRunner):
+    def __init__(self, args):
+        super(SearchBioSamplesRunner, self).__init__(args)
+        self._datasetId = args.datasetId
+        self._name = args.name
+
+    def _run(self, datasetId):
+        iterator = self._client.searchBioSamples(
+            datasetId=datasetId,
+            name=self._name)
+        self._output(iterator)
+
+    def run(self):
+        if self._datasetId is None:
+            for dataset in self.getAllDatasets():
+                self._run(dataset.id)
+        else:
+            self._run(self._datasetId)
 
 class SearchVariantsRunner(VariantFormatterMixin, AbstractSearchRunner):
     """
@@ -805,6 +824,10 @@ def addNameArgument(parser):
         "--name", default=None,
         help="The name to search over")
 
+def addBioSampleIdArgument(subparser):
+    subparser.add_argument(
+        "--bioSampleId", default=None,
+        help="the id of a BioSample")
 
 def addClientGlobalOptions(parser):
     parser.add_argument(
@@ -924,6 +947,7 @@ def addCallSetsSearchParser(subparsers):
     addOutputFormatArgument(parser)
     addPageSizeArgument(parser)
     addNameArgument(parser)
+    addBioSampleIdArgument(parser)
     addVariantSetIdArgument(parser)
     return parser
 
@@ -933,9 +957,20 @@ def addReadsSearchParser(subparsers):
         subparsers, "reads-search", "Search for reads")
     parser.set_defaults(runner=SearchReadsRunner)
     addOutputFormatArgument(parser)
+    addBioSampleIdArgument(parser)
     addReadsSearchParserArguments(parser)
     return parser
 
+def addBioSampleSearchParser(subparsers):
+    parser = addSubparser(
+        subparsers, "biosamples-search", "Search for BioSamples")
+    parser.set_defaults(runner=SearchBioSamplesRunner)
+    addUrlArgument(parser)
+    addDatasetIdArgument(parser)
+    addOutputFormatArgument(parser)
+    addNameArgument(parser)
+    addPageSizeArgument(parser)
+    return parser
 
 def addDatasetsGetParser(subparsers):
     parser = addSubparser(
@@ -1050,6 +1085,7 @@ def getClientParser():
     addVariantsGetParser(subparsers)
     addDatasetsGetParser(subparsers)
     addReferencesBasesListParser(subparsers)
+    addBioSampleSearchParser(subparsers)
     return parser
 
 

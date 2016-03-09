@@ -180,6 +180,18 @@ class TestClientArguments(unittest.TestCase):
         self.assertEqual(args.baseUrl, "BASEURL")
         self.assertEquals(args.runner, cli.SearchReadsRunner)
 
+    def testBioSamplesSearchArguments(self):
+        cliInput = (
+            "biosamples-search --pageSize 2 --name BIOSAMPLENAME "
+            "--datasetId DATASETID "
+            "BASEURL")
+        args = self.parser.parse_args(cliInput.split())
+        self.assertEqual(args.pageSize, 2)
+        self.assertEqual(args.name, "BIOSAMPLENAME")
+        self.assertEqual(args.datasetId, "DATASETID")
+        self.assertEqual(args.baseUrl, "BASEURL")
+        self.assertEquals(args.runner, cli.SearchBioSamplesRunner)
+
     def testDatasetsSearchArguments(self):
         cliInput = "datasets-search BASEURL"
         args = self.parser.parse_args(cliInput.split())

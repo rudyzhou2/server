@@ -191,6 +191,11 @@ class TestSearchMethodsCallRunRequest(unittest.TestCase):
         self.httpClient._runGetRequest.assert_called_once_with(
             "variants", protocol.Variant, self.objectId)
 
+    def testGetBioSample(self):
+        self.httpClient.getBioSample(self.objectId)
+        self.httpClient._runGetRequest.assert_called_once_with(
+            "biosamples", protocol.BioSample, self.objectId)
+
 
 class DatamodelObjectWrapper(object):
     """
