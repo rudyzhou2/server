@@ -12,6 +12,11 @@ import ga4gh.protocol as protocol
 
 
 class AbstractBioSample(datamodel.DatamodelObject):
+    """
+    This class represents an abstract BioSample object.
+    It sets default values and getters, as well as the
+    toProtocolElement function.
+    """
     compoundIdClass = datamodel.BioSampleCompoundId
 
     def __init__(self, parentContainer, localId):
@@ -54,6 +59,12 @@ class AbstractBioSample(datamodel.DatamodelObject):
 
 
 class JsonBioSample(AbstractBioSample, datamodel.MetadataSidecarMixin):
+    """
+    Allows a BioSample object to be populated using JSON
+    metadata information by passing a filepath during
+    instantiation.
+    b = JsonBioSample(dataset, name, filepath)
+    """
     def __init__(self, parentContainer, localId, filepath):
         super(JsonBioSample, self).__init__(parentContainer, localId)
         self.loadSidecar(filepath)

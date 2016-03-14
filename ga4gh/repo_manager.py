@@ -215,6 +215,9 @@ class RepoManager(object):
 
     def _checkFile(self, filePath, fileExt):
         self._assertFileExists(filePath)
+        self._checkFilenameWithExtension(filePath, fileExt)
+
+    def _checkFilenameWithExtension(self, filePath, fileExt):
         if not filePath.endswith(fileExt):
             raise exceptions.RepoManagerException(
                 "File '{}' does not have a '{}' extension".format(
@@ -395,6 +398,39 @@ class RepoManager(object):
         self._removePath(jsonPath)
         self._repoEmit("ReferenceSet '{}' removed".format(
             referenceSetName))
+
+    def addBioSample(self, datasetName, filePath, moveMode):
+        """
+        Add a BioSample
+        """
+        # move the bam file
+        self._check()
+        self._checkDataset(datasetName)
+        fileName = os.path.basename(filePath)
+        destPath = os.path.join(
+            self._repoPath, self.datasetsDirName, datasetName,
+            self.bioSamplesDirName)
+        fullDest = os.path.join(destPath, fileName)
+        self._checkFilenameWithExtension(fullDest, self.jsonExtension)
+        if not os.path.exists(destPath):
+            os.makedirs(destPath)
+        self._assertPathEmpty(fullDest)
+        self._moveFile(filePath, fullDest, moveMode)
+
+        # finish
+        self._repoEmit("BioSample '{}' added to dataset '{}'".format(
+            fileName, datasetName))
+
+    def removeBioSample(self, datasetName, bioSampleName):
+        self._check()
+        self._checkDataset(datasetName)
+        bioSamplesPath = self._getBioSamplesPath(datasetName)
+        filePath = os.path.join(bioSamplesPath, bioSampleName + ".json")
+        self._assertDirectory(bioSamplesPath)
+        self._assertFileExists(filePath, inRepo=True)
+        self._removePath(filePath)
+        self._repoEmit("BioSample '{}' removed".format(
+            filePath))
 
     def addReadGroupSet(self, datasetName, filePath, moveMode):
         """

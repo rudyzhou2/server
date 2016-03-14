@@ -1491,6 +1491,30 @@ class RemoveVariantSetRunner(AbstractRepoDatasetCommandRunner):
         self.confirmRun(func, 'variant set {}'.format(self.variantSetName))
 
 
+class AddBioSampleRunner(AbstractRepoDatasetFilepathCommandRunner):
+
+    def __init__(self, args):
+        super(AddBioSampleRunner, self).__init__(args)
+
+    def run(self):
+        self.repoManager.addBioSample(
+            self.datasetName, self.filePath, self.moveMode)
+
+
+class RemoveBioSampleRunner(AbstractRepoDatasetCommandRunner):
+
+    def __init__(self, args):
+        super(RemoveBioSampleRunner, self).__init__(args)
+        self.bioSampleName = args.bioSampleName
+
+    def run(self):
+        def func():
+            self.repoManager.removeBioSample(
+                self.datasetName, self.bioSampleName)
+        self.confirmRun(
+            func, 'BioSample {}'.format(self.bioSampleName))
+
+
 def addRepoArgument(subparser):
     subparser.add_argument(
         "repoPath", help="the file path of the data repository")
@@ -1505,6 +1529,12 @@ def addForceArgument(subparser):
 def addDatasetNameArgument(subparser):
     subparser.add_argument(
         "datasetName", help="the name of the dataset to create/modify")
+
+
+def addBioSampleNameArgument(subparser):
+    subparser.add_argument(
+        "bioSampleName",
+        help="the name of the BioSample")
 
 
 def addReadGroupSetNameArgument(subparser):
@@ -1635,6 +1665,25 @@ def getRepoParser():
     addDatasetNameArgument(removeVariantSetParser)
     addVariantSetNameArgument(removeVariantSetParser)
     addForceArgument(removeVariantSetParser)
+
+    removeBioSampleParser = addSubparser(
+        subparsers, "remove-biosample",
+        "Remove a biosample from the repo")
+    removeBioSampleParser.set_defaults(runner=RemoveBioSampleRunner)
+    addRepoArgument(removeBioSampleParser)
+    addDatasetNameArgument(removeBioSampleParser)
+    addBioSampleNameArgument(removeBioSampleParser)
+    addForceArgument(removeBioSampleParser)
+
+    addBioSampleParser = addSubparser(
+        subparsers, "add-biosample",
+        "Add a biosample to the repo")
+    addBioSampleParser.set_defaults(runner=AddBioSampleRunner)
+    addRepoArgument(addBioSampleParser)
+    addDatasetNameArgument(addBioSampleParser)
+    addFilePathArgument(addBioSampleParser)
+    addMoveModeArgument(addBioSampleParser)
+    return parser
 
     return parser
 

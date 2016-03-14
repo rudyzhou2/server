@@ -492,20 +492,22 @@ class PysamDatamodelMixin(object):
 class MetadataSidecarMixin(object):
     """
     Loads a human readable sidecar and makes its values available as
-    self._sidecar[key]. Takes the filename for which we would like
-    extra data
+    self._sidecar(key). Accepts the filename for which we would like
+    extra data.
     """
     def loadSidecar(self, filepath):
         jsonFilename = os.path.splitext(filepath)[0] + ".json"
         try:
             with open(jsonFilename) as data:
                 self._sidecar = json.load(data)
-        except ValueError:
-            print("Couldn't find yer file", jsonFilename)
+        except ValueError as e:
+            print("Couldn't find the file", jsonFilename)
+            print(e)
             print(os.path.exists(jsonFilename))
             self._sidecar = {}
-        except IOError:
-            print("Couldn't find yer file", jsonFilename)
+        except IOError as e:
+            print("Couldn't find the file", jsonFilename)
+            print(e)
             print(os.path.exists(jsonFilename))
             self._sidecar = {}
 
