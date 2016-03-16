@@ -193,6 +193,8 @@ def configure(configFile=None, baseConfig="ProductionConfig",
         numCalls = app.config["SIMULATED_BACKEND_NUM_CALLS"]
         variantDensity = app.config["SIMULATED_BACKEND_VARIANT_DENSITY"]
         numVariantSets = app.config["SIMULATED_BACKEND_NUM_VARIANT_SETS"]
+        numReadGroupsPerReadGroupSet = app.config[
+            "SIMULATED_BACKEND_NUM_READ_GROUPS"]
         numReferenceSets = app.config[
             "SIMULATED_BACKEND_NUM_REFERENCE_SETS"]
         numReferencesPerReferenceSet = app.config[
@@ -202,6 +204,7 @@ def configure(configFile=None, baseConfig="ProductionConfig",
         dataRepository = datarepo.SimulatedDataRepository(
             randomSeed=randomSeed, numCalls=numCalls,
             variantDensity=variantDensity, numVariantSets=numVariantSets,
+            numReadGroupsPerReadGroupSet=numReadGroupsPerReadGroupSet,
             numReferenceSets=numReferenceSets,
             numReferencesPerReferenceSet=numReferencesPerReferenceSet,
             numAlignments=numAlignmentsPerReadGroup)

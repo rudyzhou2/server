@@ -789,7 +789,7 @@ class TestSimulatedStack(unittest.TestCase):
         request.referenceId = reference.getId()
         self.verifySearchMethodNotSupported(request, path)
 
-    def testBioSamplesFromReads(self):
+    def testBioSamplesFromReadGroupSets(self):
         path = 'readgroupsets/search'
         dataset = self.dataRepo.getDatasets()[0]
         # get all the read group sets
@@ -798,7 +798,7 @@ class TestSimulatedStack(unittest.TestCase):
         responseData = self.sendSearchRequest(
             path, request, protocol.SearchReadGroupSetsResponse)
         # go through each read group
-        bioSamples = []
+        bioSamplesRgs = []
         for rgs in responseData.readGroupSets:
             for rg in rgs.readGroups:
                 # request biosample record
@@ -807,38 +807,22 @@ class TestSimulatedStack(unittest.TestCase):
                         'biosamples',
                         rg.bioSampleId,
                         protocol.BioSample())
-                    bioSamples.append(bioSample)
+                    bioSamplesRgs.append((bioSample.id, rgs.id))
                     self.assertNotEqual(
                         None, bioSample,
                         "A BioSample should exist for reach read")
         # search reads by biosample
-        path = 'reads/search'
-        readGroupSet = dataset.getReadGroupSets()[0]
-        readGroup = readGroupSet.getReadGroups()[0]
-        reference = readGroupSet.getReferenceSet().getReferences()[0]
-        request = protocol.SearchReadsRequest()
-        # TODO search multiple RG ids
-        request.readGroupIds = [readGroup.getId()]
-        request.referenceId = reference.getId()
-        request.bioSampleId = "A BAD ID"
-        responseData = self.sendSearchRequest(
-            path, request, protocol.SearchReadsResponse)
-        self.assertEqual(responseData.alignments, [])
-        request = protocol.SearchReadsRequest()
-        request.readGroupIds = [readGroup.getId()]
-        request.referenceId = reference.getId()
-        request.bioSampleId = bioSamples[0].id
-        responseData = self.sendSearchRequest(
-            path, request, protocol.SearchReadsResponse)
-        self.assertGreater(len(responseData.alignments), 0)
-        for alignment in responseData.alignments:
-            # The read group for each alignment
-            # has the expected bioSampleId
-            readGroup = self.sendGetObject(
-                'readgroups',
-                alignment.readGroupId,
-                protocol.ReadGroup())
-            self.assertEqual(readGroup.bioSampleId, bioSamples[0].id)
+        for bsId, rgsId in bioSamplesRgs:
+            request = protocol.SearchReadGroupSetsRequest()
+            request.datasetId = dataset.getId()
+            request.bioSampleId = bsId
+            responseData = self.sendSearchRequest(
+                path, request, protocol.SearchReadGroupSetsResponse)
+            for rgs in responseData.readGroupSets:
+                for rg in rgs.readGroups:
+                    self.assertEqual(
+                        rg.bioSampleId, bsId,
+                        "Only read groups matching the BioSample ID")
 
     def testBioSamplesFromCallSets(self):
         path = 'callsets/search'

@@ -411,7 +411,7 @@ class RepoManager(object):
             self._repoPath, self.datasetsDirName, datasetName,
             self.bioSamplesDirName)
         fullDest = os.path.join(destPath, fileName)
-        self._checkFilenameWithExtension(fullDest, self.jsonExtension)
+        self._checkFile(filePath, self.jsonExtension)
         if not os.path.exists(destPath):
             os.makedirs(destPath)
         self._assertPathEmpty(fullDest)

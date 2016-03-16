@@ -157,13 +157,6 @@ class ReadsIntervalIterator(IntervalIterator):
 
     def _search(self, start, end):
         readGroup = self._parentContainer
-        if self._request.bioSampleId:
-            if readGroup.toProtocolElement().bioSampleId == \
-                    self._request.bioSampleId:
-                return readGroup.getReadAlignments(
-                    self._reference, start, end)
-            else:
-                return iter(())
         return readGroup.getReadAlignments(
             self._reference, start, end)
 
@@ -412,6 +405,82 @@ class Backend(object):
                 nextPageToken = str(currentIndex)
             yield object_.toProtocolElement(), nextPageToken
 
+    def _filterReadGroupsByBioSampleId(self, request, readGroupSet):
+        for rg in readGroupSet.readGroups:
+            if request.bioSampleId != rg.bioSampleId:
+                readGroupSet.readGroups.remove(rg)
+        return readGroupSet
+
+    def _readGroupSetObjectGenerator(
+            self, request, numObjects, getByIndexMethod):
+        currentIndex = 0
+        if request.pageToken is not None:
+            currentIndex, = _parsePageToken(request.pageToken, 1)
+        while currentIndex < numObjects:
+            readGroupSet = getByIndexMethod(currentIndex).toProtocolElement()
+            currentIndex += 1
+            nextPageToken = None
+            if currentIndex < numObjects:
+                nextPageToken = str(currentIndex)
+            if (request.name == "" or request.name) and request.bioSampleId:
+                if request.name == readGroupSet.name:
+                    yield self._filterReadGroupsByBioSampleId(
+                        request, readGroupSet), nextPageToken
+            elif (request.name == "" or request.name):
+                if request.name == readGroupSet.name:
+                    yield readGroupSet, nextPageToken
+            elif request.bioSampleId:
+                if len(self._filterReadGroupsByBioSampleId(
+                        request, readGroupSet).readGroups) != 0:
+                    yield self._filterReadGroupsByBioSampleId(
+                        request, readGroupSet), nextPageToken
+            else:
+                yield readGroupSet, nextPageToken
+
+    def _callSetObjectGenerator(
+            self, request, numObjects, getByIndexMethod, recur=True):
+        currentIndex = 0
+        if request.pageToken is not None:
+            currentIndex, = _parsePageToken(request.pageToken, 1)
+        while currentIndex < numObjects:
+            callSet = getByIndexMethod(currentIndex).toProtocolElement()
+            currentIndex += 1
+            nextPageToken = None
+            if currentIndex < numObjects:
+                if recur:
+                    request.pageToken = str(currentIndex)
+                    for cs, pageToken in self._callSetObjectGenerator(
+                            request, numObjects, getByIndexMethod, False):
+                        nextPageToken = currentIndex
+            if request.name and request.bioSampleId:
+                if callSet.name == request.name and \
+                                callSet.bioSampleId == request.bioSampleId:
+                    yield callSet, nextPageToken
+            elif request.name:
+                if callSet.name == request.name:
+                    yield callSet, nextPageToken
+            elif request.bioSampleId:
+                if callSet.bioSampleId == request.bioSampleId:
+                    yield callSet, nextPageToken
+            else:
+                yield callSet, nextPageToken
+
+    def _bioSampleObjectGenerator(self, request, numObjects, getByIndexMethod):
+        currentIndex = 0
+        if request.pageToken is not None:
+            currentIndex, = _parsePageToken(request.pageToken, 1)
+        while currentIndex < numObjects:
+            bioSample = getByIndexMethod(currentIndex).toProtocolElement()
+            currentIndex += 1
+            nextPageToken = None
+            if currentIndex < numObjects:
+                nextPageToken = str(currentIndex)
+            if request.name:
+                if request.name == bioSample.name:
+                    yield bioSample, nextPageToken
+            else:
+                yield bioSample, nextPageToken
+
     def _objectListGenerator(self, request, objectList):
         """
         Returns a generator over the objects in the specified list using
@@ -444,17 +513,9 @@ class Backend(object):
 
     def bioSamplesGenerator(self, request):
         dataset = self.getDataRepository().getDataset(request.datasetId)
-        if request.name is None:
-            return self._topLevelObjectGenerator(
-                request, dataset.getNumBioSamples(),
-                dataset.getBioSampleByIndex)
-        else:
-            try:
-                bioSample = dataset.getBioSampleByName(request.name)
-                # TODO NEW exception
-            except exceptions.ReadGroupSetNameNotFoundException:
-                return self._noObjectGenerator()
-            return self._singleObjectGenerator(bioSample)
+        return self._bioSampleObjectGenerator(
+            request, dataset.getNumBioSamples(),
+            dataset.getBioSampleByIndex)
 
     def readGroupSetsGenerator(self, request):
         """
@@ -462,16 +523,9 @@ class Backend(object):
         defined by the specified request.
         """
         dataset = self.getDataRepository().getDataset(request.datasetId)
-        if request.name is None:
-            return self._topLevelObjectGenerator(
-                request, dataset.getNumReadGroupSets(),
-                dataset.getReadGroupSetByIndex)
-        else:
-            try:
-                readGroupSet = dataset.getReadGroupSetByName(request.name)
-            except exceptions.ReadGroupSetNameNotFoundException:
-                return self._noObjectGenerator()
-            return self._singleObjectGenerator(readGroupSet)
+        return self._readGroupSetObjectGenerator(
+            request, dataset.getNumReadGroupSets(),
+            dataset.getReadGroupSetByIndex)
 
     def referenceSetsGenerator(self, request):
         """
@@ -595,21 +649,9 @@ class Backend(object):
         compoundId = datamodel.VariantSetCompoundId.parse(request.variantSetId)
         dataset = self.getDataRepository().getDataset(compoundId.datasetId)
         variantSet = dataset.getVariantSet(compoundId.variantSetId)
-        if request.name and request.name != "":
-            try:
-                callSet = variantSet.getCallSetByName(request.name)
-            except exceptions.CallSetNameNotFoundException:
-                return self._noObjectGenerator()
-            return self._singleObjectGenerator(callSet)
-        elif request.bioSampleId and request.bioSampleId != "":
-            for cs in variantSet._callSetNameMap.values():
-                if cs.toProtocolElement().bioSampleId == request.bioSampleId:
-                    return self._singleObjectGenerator(cs)
-            return self._noObjectGenerator()
-        else:
-            return self._topLevelObjectGenerator(
-                request, variantSet.getNumCallSets(),
-                variantSet.getCallSetByIndex)
+        return self._callSetObjectGenerator(
+            request, variantSet.getNumCallSets(),
+            variantSet.getCallSetByIndex)
 
     ###########################################################
     #

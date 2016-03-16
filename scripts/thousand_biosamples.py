@@ -23,13 +23,16 @@ def main():
                     row['Population'],
                     row['Population Description'],
                     row['Gender'])
+                info = {}
+                for key in row:
+                    info[key] = [row[key]]
                 biosample = {
                     "name": row['Sample'],
                     "description": description,
                     "disease": None,  # Ontology term
                     "createDateTime": datetime.datetime.now().isoformat(),
                     "updateDateTime": datetime.datetime.now().isoformat(),
-                    "info": row
+                    "info": info
                 }
                 json.dump(biosample, outfile)
 

@@ -11,7 +11,7 @@ from protocol import SearchResponse
 
 import avro.schema
 
-version = '0.6.0a3'
+version = '0.6.0a4'
 
 
 class AlleleLocation(ProtocolElement):
@@ -2404,8 +2404,10 @@ class SearchReadGroupSetsRequest(SearchRequest):
 "SearchReadGroupSetsRequest", "fields": [{"doc": "", "type": "string",
 "name": "datasetId"}, {"default": null, "doc": "", "type": ["null",
 "string"], "name": "name"}, {"default": null, "doc": "", "type":
-["null", "int"], "name": "pageSize"}, {"default": null, "doc": "",
-"type": ["null", "string"], "name": "pageToken"}], "doc": ""}
+["null", "string"], "name": "bioSampleId"}, {"default": null, "doc":
+"", "type": ["null", "int"], "name": "pageSize"}, {"default": null,
+"doc": "", "type": ["null", "string"], "name": "pageToken"}], "doc":
+""}
 """
     schema = avro.schema.parse(_schemaSource)
     requiredFields = set([
@@ -2424,10 +2426,16 @@ class SearchReadGroupSetsRequest(SearchRequest):
         return embeddedTypes[fieldName]
 
     __slots__ = [
-        'datasetId', 'name', 'pageSize', 'pageToken'
+        'bioSampleId', 'datasetId', 'name', 'pageSize', 'pageToken'
     ]
 
     def __init__(self, **kwargs):
+        self.bioSampleId = kwargs.get(
+            'bioSampleId', None)
+        """
+        Specifying the id of a BioSample record will return only
+        readgroups   with the given bioSampleId.
+        """
         self.datasetId = kwargs.get(
             'datasetId', None)
         """
@@ -2574,10 +2582,9 @@ class SearchReadsRequest(SearchRequest):
 "doc": "", "type": ["null", "string"], "name": "referenceId"},
 {"default": null, "doc": "", "type": ["null", "long"], "name":
 "start"}, {"default": null, "doc": "", "type": ["null", "long"],
-"name": "end"}, {"default": null, "doc": "", "type": ["null",
-"string"], "name": "bioSampleId"}, {"default": null, "doc": "",
-"type": ["null", "int"], "name": "pageSize"}, {"default": null, "doc":
-"", "type": ["null", "string"], "name": "pageToken"}], "doc": ""}
+"name": "end"}, {"default": null, "doc": "", "type": ["null", "int"],
+"name": "pageSize"}, {"default": null, "doc": "", "type": ["null",
+"string"], "name": "pageToken"}], "doc": ""}
 """
     schema = avro.schema.parse(_schemaSource)
     requiredFields = set([
@@ -2596,17 +2603,11 @@ class SearchReadsRequest(SearchRequest):
         return embeddedTypes[fieldName]
 
     __slots__ = [
-        'bioSampleId', 'end', 'pageSize', 'pageToken', 'readGroupIds',
-        'referenceId', 'start'
+        'end', 'pageSize', 'pageToken', 'readGroupIds', 'referenceId',
+        'start'
     ]
 
     def __init__(self, **kwargs):
-        self.bioSampleId = kwargs.get(
-            'bioSampleId', None)
-        """
-        Specifying the id of a BioSample record will return   results
-        from the requested sample.
-        """
         self.end = kwargs.get(
             'end', None)
         """
