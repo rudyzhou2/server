@@ -406,13 +406,16 @@ class Backend(object):
             yield object_.toProtocolElement(), nextPageToken
 
     def _filterReadGroupsByBioSampleId(self, request, readGroupSet):
+        newRg = []
         for rg in readGroupSet.readGroups:
-            if request.bioSampleId != rg.bioSampleId:
-                readGroupSet.readGroups.remove(rg)
+            print(rg.bioSampleId, request.bioSampleId)
+            if request.bioSampleId == rg.bioSampleId:
+                newRg.append(rg)
+        readGroupSet.readGroups = newRg
         return readGroupSet
 
     def _readGroupSetObjectGenerator(
-            self, request, numObjects, getByIndexMethod):
+            self, request, numObjects, getByIndexMethod, recur=True):
         currentIndex = 0
         if request.pageToken is not None:
             currentIndex, = _parsePageToken(request.pageToken, 1)
@@ -421,7 +424,11 @@ class Backend(object):
             currentIndex += 1
             nextPageToken = None
             if currentIndex < numObjects:
-                nextPageToken = str(currentIndex)
+                if recur:
+                    request.pageToken = str(currentIndex)
+                    for rgs, pageToken in self._readGroupSetObjectGenerator(
+                            request, numObjects, getByIndexMethod, False):
+                        nextPageToken = currentIndex
             if (request.name == "" or request.name) and request.bioSampleId:
                 if request.name == readGroupSet.name:
                     yield self._filterReadGroupsByBioSampleId(

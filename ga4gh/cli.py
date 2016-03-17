@@ -331,10 +331,13 @@ class SearchReadGroupSetsRunner(AbstractSearchRunner):
         super(SearchReadGroupSetsRunner, self).__init__(args)
         self._datasetId = args.datasetId
         self._name = args.name
+        self._bioSampleId = args.bioSampleId
 
     def _run(self, datasetId):
         iterator = self._client.searchReadGroupSets(
-            datasetId=datasetId, name=self._name)
+            datasetId=datasetId,
+            name=self._name,
+            bioSampleId=self._bioSampleId)
         self._output(iterator)
 
     def run(self):
@@ -938,6 +941,7 @@ def addReadGroupSetsSearchParser(subparsers):
         subparsers, "readgroupsets-search", "Search for readGroupSets")
     parser.set_defaults(runner=SearchReadGroupSetsRunner)
     addUrlArgument(parser)
+    addBioSampleIdArgument(parser)
     addOutputFormatArgument(parser)
     addPageSizeArgument(parser)
     addDatasetIdArgument(parser)
@@ -963,7 +967,6 @@ def addReadsSearchParser(subparsers):
         subparsers, "reads-search", "Search for reads")
     parser.set_defaults(runner=SearchReadsRunner)
     addOutputFormatArgument(parser)
-    addBioSampleIdArgument(parser)
     addReadsSearchParserArguments(parser)
     return parser
 
