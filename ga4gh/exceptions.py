@@ -235,7 +235,7 @@ class UnsupportedMediaTypeException(RuntimeException):
 
 class RangeErrorException(RuntimeException):
     """
-    The superclass of all exceptions for which a query range error occured.
+    The superclass of all exceptions for which a query range error occurred.
     This raises a HTTP Error 416 "Requested Range not satisfiable".
     """
     httpStatus = 416

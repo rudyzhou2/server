@@ -9,6 +9,7 @@ import datetime
 
 import ga4gh.datamodel as datamodel
 import ga4gh.protocol as protocol
+import ga4gh.exceptions as exceptions
 
 
 class AbstractBioSample(datamodel.DatamodelObject):
@@ -65,9 +66,16 @@ class JsonBioSample(AbstractBioSample, datamodel.MetadataSidecarMixin):
     instantiation.
     b = JsonBioSample(dataset, name, filepath)
     """
-    def __init__(self, parentContainer, localId, filepath):
+    def __init__(self, parentContainer, localId, filePath):
         super(JsonBioSample, self).__init__(parentContainer, localId)
-        self.loadSidecar(filepath)
+        self._filePath = filePath
+        self.loadSidecar(filePath)
+        self.validate()
+
+    def validate(self):
+        if not protocol.BioSample.validate(
+                self.toProtocolElement().toJsonDict()):
+            raise exceptions.FileOpenFailedException(self._filePath)
 
     def getCreateDateTime(self):
         if self.sidecar('createDateTime'):

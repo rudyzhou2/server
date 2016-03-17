@@ -17,6 +17,7 @@ import pysam
 import ga4gh.exceptions as exceptions
 import ga4gh.datarepo as datarepo
 import ga4gh.datamodel.datasets as datasets
+import ga4gh.datamodel.biodata as biodata
 
 
 def getReferenceChecksum(fastaFile):
@@ -412,6 +413,12 @@ class RepoManager(object):
             self.bioSamplesDirName)
         fullDest = os.path.join(destPath, fileName)
         self._checkFile(filePath, self.jsonExtension)
+        dataset = datasets.AbstractDataset('dataset1')
+        try:
+            biodata.JsonBioSample(dataset, "name", filePath)
+        except:
+            message = "BioSample JSON is malformed"
+            raise exceptions.RepoManagerException(message)
         if not os.path.exists(destPath):
             os.makedirs(destPath)
         self._assertPathEmpty(fullDest)

@@ -185,6 +185,9 @@ class RepoManagerInidividualCommandTest(AbstractRepoManagerTest):
             self.repoManager.addBioSample(
                 'dataset1', paths.bioSamplePath, 'link')
         self.repoManager.addDataset('dataset1')
+        with self.assertRaises(exceptions.RepoManagerException):
+            self.repoManager.addBioSample(
+                'dataset1', paths.malformedBioSamplePath, 'link')
         self.repoManager.addDataset('dataset2')
         self.repoManager.addBioSample(
             'dataset1', paths.bioSamplePath, 'link')

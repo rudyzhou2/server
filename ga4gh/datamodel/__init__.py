@@ -500,15 +500,11 @@ class MetadataSidecarMixin(object):
         try:
             with open(jsonFilename) as data:
                 self._sidecar = json.load(data)
-        except ValueError as e:
-            print("Couldn't find the file", jsonFilename)
-            print(e)
-            print(os.path.exists(jsonFilename))
+        except ValueError:
+            raise exceptions.FileOpenFailedException(jsonFilename)
             self._sidecar = {}
-        except IOError as e:
-            print("Couldn't find the file", jsonFilename)
-            print(e)
-            print(os.path.exists(jsonFilename))
+        except IOError:
+            raise exceptions.FileOpenFailedException(jsonFilename)
             self._sidecar = {}
 
     def sidecar(self, key):
