@@ -77,38 +77,26 @@ class JsonBioSample(AbstractBioSample, datamodel.MetadataSidecarMixin):
                 self.toProtocolElement().toJsonDict()):
             raise exceptions.FileOpenFailedException(self._filePath)
 
-    def getCreateDateTime(self):
-        if self.sidecar('createDateTime'):
-            return self.sidecar('createDateTime')
+    def _getField(self, fieldName):
+        if self.sidecar(fieldName):
+            return self.sidecar(fieldName)
         else:
-            return self._createDateTime
+            return self.__getattribute__('_' + fieldName)
+
+    def getCreateDateTime(self):
+        return self._getField('createDateTime')
 
     def getUpdateDateTime(self):
-        if self.sidecar('updateDateTime'):
-            return self.sidecar('updateDateTime')
-        else:
-            return self._updateDateTime
+        return self._getField('updateDateTime')
 
     def getDescription(self):
-        if self.sidecar('description'):
-            return self.sidecar('description')
-        else:
-            return self._description
+        return self._getField('description')
 
     def getDisease(self):
-        if self.sidecar('disease'):
-            return self.sidecar('disease')
-        else:
-            return self._disease
+        return self._getField('disease')
 
     def getInfo(self):
-        if self.sidecar('info'):
-            return self.sidecar('info')
-        else:
-            return self._info
+        return self._getField('info')
 
     def getName(self):
-        if self.sidecar('name'):
-            return self.sidecar('name')
-        else:
-            return self._name
+        return self._getField('name')

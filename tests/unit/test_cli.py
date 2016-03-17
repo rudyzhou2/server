@@ -208,6 +208,10 @@ class TestClientArguments(unittest.TestCase):
         self.verifyGetArguments(
             "referencesets-get", cli.GetReferenceSetRunner)
 
+    def testBioSamplesGetArguments(self):
+        self.verifyGetArguments(
+            "biosamples-get", cli.GetBioSamplesRunner)
+
     def testReferenceGetArguments(self):
         self.verifyGetArguments(
             "references-get", cli.GetReferenceRunner)
@@ -356,6 +360,27 @@ class TestRepoManagerCli(unittest.TestCase):
         self.assertEquals(args.variantSetName, variantSetName)
         self.assertEquals(args.runner, cli.RemoveVariantSetRunner)
         self.assertEquals(args.force, False)
+
+    def testRemoveBioSample(self):
+        bioSampleName = "bioSampleName"
+        cliInput = "remove-biosample {} {} {}".format(
+            self.repoPath, self.datasetName, bioSampleName)
+        args = self.parser.parse_args(cliInput.split())
+        self.assertEquals(args.repoPath, self.repoPath)
+        self.assertEquals(args.datasetName, self.datasetName)
+        self.assertEquals(args.bioSampleName, bioSampleName)
+        self.assertEquals(args.runner, cli.RemoveBioSampleRunner)
+        self.assertEquals(args.force, False)
+
+    def testAddBioSample(self):
+        cliInput = "add-biosample {} {} {} --moveMode=move".format(
+            self.repoPath, self.datasetName, self.filePath)
+        args = self.parser.parse_args(cliInput.split())
+        self.assertEquals(args.repoPath, self.repoPath)
+        self.assertEquals(args.datasetName, self.datasetName)
+        self.assertEquals(args.filePath, self.filePath)
+        self.assertEquals(args.moveMode, "move")
+        self.assertEquals(args.runner, cli.AddBioSampleRunner)
 
 
 class TestOutputFormats(unittest.TestCase):

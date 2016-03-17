@@ -674,6 +674,15 @@ class GetVariantSetRunner(AbstractGetRunner):
         self._method = self._client.getVariantSet
 
 
+class GetBioSamplesRunner(AbstractGetRunner):
+    """
+    Runner class for the biosamples/{id} method
+    """
+    def __init__(self, args):
+        super(GetBioSamplesRunner, self).__init__(args)
+        self._method = self._client.getBioSample
+
+
 def addDisableUrllibWarningsArgument(parser):
     parser.add_argument(
         "--disable-urllib-warnings", default=False, action="store_true",
@@ -983,6 +992,17 @@ def addBioSampleSearchParser(subparsers):
     return parser
 
 
+def addBioSampleGetParser(subparsers):
+    parser = addSubparser(
+        subparsers, "biosamples-get", "Get a BioSamples")
+    parser.set_defaults(runner=GetBioSamplesRunner)
+    addUrlArgument(parser)
+    addOutputFormatArgument(parser)
+    addIdArgument(parser)
+    addPageSizeArgument(parser)
+    return parser
+
+
 def addDatasetsGetParser(subparsers):
     parser = addSubparser(
         subparsers, "datasets-get", "Get a dataset")
@@ -1097,6 +1117,7 @@ def getClientParser():
     addDatasetsGetParser(subparsers)
     addReferencesBasesListParser(subparsers)
     addBioSampleSearchParser(subparsers)
+    addBioSampleGetParser(subparsers)
     return parser
 
 

@@ -119,12 +119,11 @@ class AbstractDataset(datamodel.DatamodelObject):
 
     def getBioSample(self, id_):
         """
-        Returns the VariantSet with the specified name, or raises a
-        VariantSetNotFoundException otherwise.
+        Returns the BioSample with the specified ID, or raises a
+        BioSampleNotFoundException otherwise.
         """
         if id_ not in self._bioSampleIdMap:
-            # TODO different exception
-            raise exceptions.VariantSetNotFoundException(id_)
+            raise exceptions.BioSampleNotFoundException(id_)
         return self._bioSampleIdMap[id_]
 
     def getBioSampleByIndex(self, index):
@@ -148,16 +147,6 @@ class AbstractDataset(datamodel.DatamodelObject):
         return self._variantAnnotationSetIdMap[
             self._variantAnnotationSetIds[index]]
 
-    def getBioSampleByName(self, name):
-        """
-        Returns a ReadGroupSet with the specified name, or raises a
-        ReadGroupSetNameNotFoundException if it does not exist.
-        """
-        if name not in self._bioSampleNameMap:
-            # TODO different exception
-            raise exceptions.ReadGroupSetNameNotFoundException(name)
-        return self._bioSampleNameMap[name]
-
     def getNumReadGroupSets(self):
         """
         Returns the number of readgroup sets in this dataset.
@@ -166,7 +155,7 @@ class AbstractDataset(datamodel.DatamodelObject):
 
     def getNumBioSamples(self):
         """
-        Returns the number of readgroup sets in this dataset.
+        Returns the number of biosamples in this dataset.
         """
         return len(self._bioSampleIds)
 
@@ -224,11 +213,11 @@ class SimulatedDataset(AbstractDataset):
             seed = randomSeed + i
             variantSet = variants.SimulatedVariantSet(
                 self, localId, seed, numCalls, variantDensity)
-            cs = variantSet.getCallSets()
+            callSets = variantSet.getCallSets()
             # Add biosamples
-            for c in cs:
+            for callSet in callSets:
                 bioSample = datamodel.biodata.AbstractBioSample(
-                    self, c.getLocalId())
+                    self, callSet.getLocalId())
                 self.addBioSample(bioSample)
             self.addVariantSet(variantSet)
             variantAnnotationSet = variants.SimulatedVariantAnnotationSet(

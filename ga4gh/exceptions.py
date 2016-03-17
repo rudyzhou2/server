@@ -189,6 +189,12 @@ class VariantSetNotFoundException(NotFoundException):
             variantSetId)
 
 
+class BioSampleNotFoundException(NotFoundException):
+    def __init__(self, bioSampleId):
+        self.message = "The requested BioSample '{}' was not found".format(
+            bioSampleId)
+
+
 class AnnotationSetNotFoundException(NotFoundException):
     def __init__(self, variantAnnotationSetId):
         self.message = "The requested VariantAnnotationSet '{}'" \

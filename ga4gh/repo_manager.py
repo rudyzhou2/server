@@ -404,7 +404,6 @@ class RepoManager(object):
         """
         Add a BioSample
         """
-        # move the bam file
         self._check()
         self._checkDataset(datasetName)
         fileName = os.path.basename(filePath)
@@ -413,10 +412,10 @@ class RepoManager(object):
             self.bioSamplesDirName)
         fullDest = os.path.join(destPath, fileName)
         self._checkFile(filePath, self.jsonExtension)
-        dataset = datasets.AbstractDataset('dataset1')
+        dataset = datasets.AbstractDataset('temp_ds')
         try:
             biodata.JsonBioSample(dataset, "name", filePath)
-        except:
+        except exceptions.FileOpenFailedException:
             message = "BioSample JSON is malformed"
             raise exceptions.RepoManagerException(message)
         if not os.path.exists(destPath):

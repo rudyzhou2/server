@@ -86,6 +86,17 @@ Reads
 .. autoclass:: ga4gh.protocol.Position
     :members:
 
+
++++++++
+BioData
++++++++
+
+.. autoclass:: ga4gh.protocol.BioSample
+    :members:
+
+.. autoclass:: ga4gh.protocol.Individual
+    :members:
+
 ----------
 Client API
 ----------

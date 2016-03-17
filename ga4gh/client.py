@@ -418,6 +418,7 @@ class AbstractClient(object):
         request = protocol.SearchBioSamplesRequest()
         request.datasetId = datasetId
         request.name = name
+        request.pageSize = self._pageSize
         return self._runSearchRequest(
             request, "biosamples", protocol.SearchBioSamplesResponse)
 

@@ -31,12 +31,8 @@ class TestBioSamples(unittest.TestCase):
             try:
                 with open(jsonFilename) as data:
                     jsonDict = json.load(data)
-            except ValueError:
+            except (ValueError, IOError):
                 # Poorly formed JSON throws expected exception
-                self.assertRaises(
-                    exceptions.FileOpenFailedException,
-                    biodata.JsonBioSample, self.dataset, localId, jsonFilename)
-            except IOError:
                 self.assertRaises(
                     exceptions.FileOpenFailedException,
                     biodata.JsonBioSample, self.dataset, localId, jsonFilename)

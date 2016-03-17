@@ -7,12 +7,17 @@
     Siblings,Grandparents,Avuncular,Half Siblings,
     Unknown Second Order,Third Order,Other Comments
 """
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
 
 import csv
 import json
 import datetime
+import utils
 
 
+@utils.Timed()
 def main():
     with open('20130606_sample_info.csv', 'r') as csvfile:
         reader = csv.DictReader(csvfile)

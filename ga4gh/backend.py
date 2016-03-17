@@ -405,17 +405,30 @@ class Backend(object):
                 nextPageToken = str(currentIndex)
             yield object_.toProtocolElement(), nextPageToken
 
-    def _filterReadGroupsByBioSampleId(self, request, readGroupSet):
+    def _filterReadGroupsByBioSampleId(self, bioSampleId, readGroupSet):
+        """
+        Accepts a request object containing a biosampleId and
+        removes read groups that don't match the given id.
+        :param str bioSampleId:
+        :param readGroupSet:
+        :return: readGroupSet
+        """
         newRg = []
         for rg in readGroupSet.readGroups:
-            print(rg.bioSampleId, request.bioSampleId)
-            if request.bioSampleId == rg.bioSampleId:
+            if bioSampleId == rg.bioSampleId:
                 newRg.append(rg)
         readGroupSet.readGroups = newRg
         return readGroupSet
 
     def _readGroupSetObjectGenerator(
             self, request, numObjects, getByIndexMethod, recur=True):
+        """
+        Returns read group sets that match the given request.
+        Filters read groups by a request's bioSampleId. In order
+        to properly set the nextPageToken the function searches
+        ahead to the next page to see if there are results using
+        a recursive call.
+        """
         currentIndex = 0
         if request.pageToken is not None:
             currentIndex, = _parsePageToken(request.pageToken, 1)
@@ -423,29 +436,38 @@ class Backend(object):
             readGroupSet = getByIndexMethod(currentIndex).toProtocolElement()
             currentIndex += 1
             nextPageToken = None
-            if currentIndex < numObjects:
-                if recur:
-                    request.pageToken = str(currentIndex)
-                    for rgs, pageToken in self._readGroupSetObjectGenerator(
-                            request, numObjects, getByIndexMethod, False):
-                        nextPageToken = currentIndex
+            if currentIndex < numObjects and recur:
+                request.pageToken = str(currentIndex)
+                for rgs, pageToken in self._readGroupSetObjectGenerator(
+                        request, numObjects, getByIndexMethod, False):
+                    nextPageToken = str(currentIndex)
+                    break
             if (request.name == "" or request.name) and request.bioSampleId:
                 if request.name == readGroupSet.name:
                     yield self._filterReadGroupsByBioSampleId(
-                        request, readGroupSet), nextPageToken
+                        request.bioSampleId, readGroupSet), nextPageToken
             elif (request.name == "" or request.name):
                 if request.name == readGroupSet.name:
                     yield readGroupSet, nextPageToken
             elif request.bioSampleId:
                 if len(self._filterReadGroupsByBioSampleId(
-                        request, readGroupSet).readGroups) != 0:
+                        request.bioSampleId,
+                        readGroupSet).readGroups) != 0:
                     yield self._filterReadGroupsByBioSampleId(
-                        request, readGroupSet), nextPageToken
+                        request.bioSampleId,
+                        readGroupSet), nextPageToken
             else:
                 yield readGroupSet, nextPageToken
 
     def _callSetObjectGenerator(
             self, request, numObjects, getByIndexMethod, recur=True):
+        """
+        Returns callsets that match the given request.
+        Filters callsets by a request's bioSampleId. In order
+        to properly set the nextPageToken the function searches
+        ahead to the next page to see if there are results using
+        a recursive call.
+        """
         currentIndex = 0
         if request.pageToken is not None:
             currentIndex, = _parsePageToken(request.pageToken, 1)
@@ -453,15 +475,15 @@ class Backend(object):
             callSet = getByIndexMethod(currentIndex).toProtocolElement()
             currentIndex += 1
             nextPageToken = None
-            if currentIndex < numObjects:
-                if recur:
-                    request.pageToken = str(currentIndex)
-                    for cs, pageToken in self._callSetObjectGenerator(
-                            request, numObjects, getByIndexMethod, False):
-                        nextPageToken = currentIndex
+            if currentIndex < numObjects and recur:
+                request.pageToken = str(currentIndex)
+                for cs, pageToken in self._callSetObjectGenerator(
+                        request, numObjects, getByIndexMethod, False):
+                    nextPageToken = str(currentIndex)
+                    break
             if request.name and request.bioSampleId:
-                if callSet.name == request.name and \
-                                callSet.bioSampleId == request.bioSampleId:
+                if callSet.name == request.name and (
+                        callSet.bioSampleId == request.bioSampleId):
                     yield callSet, nextPageToken
             elif request.name:
                 if callSet.name == request.name:
@@ -473,6 +495,10 @@ class Backend(object):
                 yield callSet, nextPageToken
 
     def _bioSampleObjectGenerator(self, request, numObjects, getByIndexMethod):
+        """
+        Function for iterating through biosamples that optionally
+        filters by a name provided in the request.
+        """
         currentIndex = 0
         if request.pageToken is not None:
             currentIndex, = _parsePageToken(request.pageToken, 1)
@@ -495,19 +521,6 @@ class Backend(object):
         """
         return self._topLevelObjectGenerator(
             request, len(objectList), lambda index: objectList[index])
-
-    def _singleObjectGenerator(self, datamodelObject):
-        """
-        Returns a generator suitable for a search method in which the
-        result set is a single object.
-        """
-        yield (datamodelObject.toProtocolElement(), None)
-
-    def _noObjectGenerator(self):
-        """
-        Returns a generator yielding no results
-        """
-        return iter([])
 
     def datasetsGenerator(self, request):
         """
