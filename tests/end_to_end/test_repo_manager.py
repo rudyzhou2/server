@@ -40,10 +40,13 @@ class RepoManagerEndToEndTest(unittest.TestCase):
         self._runCmd("add-readgroupset", self.datasetName, paths.bamPath)
         self._runCmd("add-variantset", self.datasetName, paths.vcfDirPath)
         self._runCmd("add-biosample", self.datasetName, paths.bioSamplePath)
+        self._runCmd("add-individual", self.datasetName, paths.individualPath)
         self._runCmd("check", "--skipConsistencyCheck")
         self._runCmd("list")
         self._runCmd(
             "remove-biosample", self.datasetName, paths.bioSampleName, "-f")
+        self._runCmd(
+            "remove-individual", self.datasetName, paths.individualName, "-f")
         self._runCmd(
             "remove-variantset", self.datasetName, paths.variantSetName,
             "-f")
