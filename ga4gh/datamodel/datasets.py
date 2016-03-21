@@ -35,6 +35,9 @@ class AbstractDataset(datamodel.DatamodelObject):
         self._bioSampleIds = []
         self._bioSampleIdMap = {}
         self._bioSampleNameMap = {}
+        self._individualIds = []
+        self._individualIdMap = {}
+        self._individualNameMap = {}
         self._description = None
 
     def addBioSample(self, bioSample):
@@ -42,6 +45,12 @@ class AbstractDataset(datamodel.DatamodelObject):
         self._bioSampleIdMap[id_] = bioSample
         self._bioSampleIds.append(id_)
         self._bioSampleNameMap[bioSample.getName()] = bioSample
+
+    def addIndividual(self, individual):
+        id_ = individual.getId()
+        self._individualIdMap[id_] = individual
+        self._individualIds.append(id_)
+        self._individualNameMap[individual.getName()] = individual
 
     def addVariantSet(self, variantSet):
         """
@@ -126,12 +135,26 @@ class AbstractDataset(datamodel.DatamodelObject):
             raise exceptions.BioSampleNotFoundException(id_)
         return self._bioSampleIdMap[id_]
 
+    def getIndividual(self, id_):
+        """
+        Returns the Individual with the specified ID, or raises a
+        IndividualNotFoundException otherwise.
+        """
+        if id_ not in self._individualIdMap:
+            raise exceptions.IndividualNotFoundException(id_)
+        return self._individualIdMap[id_]
+
     def getBioSampleByIndex(self, index):
         """
-        Returns the VariantSet with the specified name, or raises a
-        VariantSetNotFoundException otherwise.
+        Returns the BioSample set at the specified index in this dataset.
         """
         return self._bioSampleIdMap[self._bioSampleIds[index]]
+
+    def getIndividualByIndex(self, index):
+        """
+        Returns the Individual set at the specified index in this dataset.
+        """
+        return self._individualIdMap[self._individualIds[index]]
 
     def getVariantSetByIndex(self, index):
         """
@@ -158,6 +181,12 @@ class AbstractDataset(datamodel.DatamodelObject):
         Returns the number of biosamples in this dataset.
         """
         return len(self._bioSampleIds)
+
+    def getNumIndividuals(self):
+        """
+        Returns the number of individuals in this dataset.
+        """
+        return len(self._individualIds)
 
     def getReadGroupSets(self):
         """
@@ -218,6 +247,9 @@ class SimulatedDataset(AbstractDataset):
             for callSet in callSets:
                 bioSample = datamodel.biodata.AbstractBioSample(
                     self, callSet.getLocalId())
+                individual = datamodel.biodata.AbstractIndividual(
+                    self, callSet.getLocalId())
+                self.addIndividual(individual)
                 self.addBioSample(bioSample)
             self.addVariantSet(variantSet)
             variantAnnotationSet = variants.SimulatedVariantAnnotationSet(
@@ -233,6 +265,9 @@ class SimulatedDataset(AbstractDataset):
             for rg in readGroupSet.getReadGroups():
                 bioSample = datamodel.biodata.AbstractBioSample(
                     self, rg.getLocalId())
+                individual = datamodel.biodata.AbstractIndividual(
+                    self, rg.getLocalId())
+                self.addIndividual(individual)
                 self.addBioSample(bioSample)
             self.addReadGroupSet(readGroupSet)
 
@@ -286,6 +321,15 @@ class FileSystemDataset(AbstractDataset):
                 bioSample = biodata.JsonBioSample(
                     self, localId, filepath)
                 self.addBioSample(bioSample)
+
+        individualsDir = os.path.join(dataDir, self.individualsDirName)
+        for filename in os.listdir(individualsDir):
+            if fnmatch.fnmatch(filename, '*.json'):
+                filepath = os.path.join(individualsDir, filename)
+                localId, _ = os.path.splitext(filename)
+                individual = biodata.JsonIndividual(
+                    self, localId, filepath)
+                self.addIndividual(individual)
 
     def _setMetadata(self):
         metadataFileName = '{}.json'.format(self._dataDir)

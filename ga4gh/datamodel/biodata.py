@@ -35,14 +35,14 @@ class AbstractBioSample(datamodel.DatamodelObject):
         bioSample.description = self.getDescription()
         bioSample.disease = self.getDisease()
         bioSample.id = self.getId()
+        bioSample.individualId = self.getIndividualId()
         bioSample.info = self.getInfo()
         bioSample.name = self.getName()
         bioSample.updateDateTime = self.getUpdateDateTime()
         return bioSample
 
     def getIndividualId(self):
-        datasetId = self.getParentContainer(
-            ).getParentContainer().getCompoundId()
+        datasetId = self.getParentContainer().getCompoundId()
         compoundId = datamodel.IndividualCompoundId(
             datasetId, self.getLocalId())
         return str(compoundId)

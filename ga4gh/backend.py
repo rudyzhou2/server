@@ -814,12 +814,21 @@ class Backend(object):
 
     def runGetBioSample(self, id_):
         """
-        Runs a getVariantSet request for the specified ID.
+        Runs a getBioSample request for the specified ID.
         """
         compoundId = datamodel.BioSampleCompoundId.parse(id_)
         dataset = self.getDataRepository().getDataset(compoundId.datasetId)
         bioSample = dataset.getBioSample(id_)
         return self.runGetRequest(bioSample)
+
+    def runGetIndividual(self, id_):
+        """
+        Runs a getIndividual request for the specified ID.
+        """
+        compoundId = datamodel.BioSampleCompoundId.parse(id_)
+        dataset = self.getDataRepository().getDataset(compoundId.datasetId)
+        individual = dataset.getIndividual(id_)
+        return self.runGetRequest(individual)
 
     def runGetDataset(self, id_):
         """

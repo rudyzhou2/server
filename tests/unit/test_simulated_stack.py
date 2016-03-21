@@ -952,11 +952,12 @@ class TestSimulatedStack(unittest.TestCase):
         for dataset in self.dataRepo.getDatasets():
             for bioSampleId in dataset._bioSampleIdMap:
                 bioSample = dataset._bioSampleIdMap[bioSampleId]
+                print(bioSample.getIndividualId())
                 responseObject = self.sendGetObject(
                     path,
-                    bioSample.individualId,
+                    bioSample.getIndividualId(),
                     protocol.Individual)
-                self.assertEqual(responseObject.id, bioSample.individualId)
+                self.assertEqual(responseObject.id, bioSample.getIndividualId())
         for badId in self.getBadIds():
             self.verifyGetMethodFails(path, badId)
 

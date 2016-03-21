@@ -195,6 +195,12 @@ class BioSampleNotFoundException(NotFoundException):
             bioSampleId)
 
 
+class IndividualNotFoundException(NotFoundException):
+    def __init__(self, individualId):
+        self.message = "The requested Individual '{}' was not found".format(
+            individualId)
+
+
 class AnnotationSetNotFoundException(NotFoundException):
     def __init__(self, variantAnnotationSetId):
         self.message = "The requested VariantAnnotationSet '{}'" \
