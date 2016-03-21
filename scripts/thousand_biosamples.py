@@ -23,7 +23,9 @@ def main():
         reader = csv.DictReader(csvfile)
         for row in reader:
             with open(
-                    "biosamples/" + row['Sample'] + ".json", 'w') as outfile:
+                    "biodata/biosamples/" + row['Sample'] + ".json", 'w') as bioSampleOut, \
+                open(
+                    "biodata/individuals/" + row['Sample'] + ".json", 'w') as individualOut:
                 description = "{} {} {}".format(
                     row['Population'],
                     row['Population Description'],
@@ -39,7 +41,40 @@ def main():
                     "updateDateTime": datetime.datetime.now().isoformat(),
                     "info": info
                 }
-                json.dump(biosample, outfile)
+                if row['Gender'] == 'male':
+                    sex = {
+                        "id": "PATO:0020001",
+                        "term": "male genotypic sex",
+                        "sourceName": "PATO",
+                        "sourceVersion": "2015-11-18"
+                    }
+                elif row['Gender'] == 'female':
+                    sex = {
+                        "id": "PATO:0020002",
+                        "term": "female",
+                        "sourceName": "PATO",
+                        "sourceVersion": "2015-11-18"
+                    }
+                else:
+                    sex = None
+                individual = {
+                    "name": row['Sample'],
+                    "description": description,
+                    "sex": None,  # Ontology term
+                    "species": {
+                        "term": "Homo sapiens",
+                        "id": "NCBITaxon:9606",
+                        "sourceName": "http://purl.obolibrary.org/obo",
+                        "sourceVersion": "2016-02-02"
+                    },
+                    "sex": sex,
+                    "createDateTime": datetime.datetime.now().isoformat(),
+                    "updateDateTime": datetime.datetime.now().isoformat(),
+                    "info": info
+                }
+
+                json.dump(biosample, bioSampleOut)
+                json.dump(individual, individualOut)
 
 if __name__ == "__main__":
     main()

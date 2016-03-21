@@ -49,7 +49,7 @@ class TestIndividuals(unittest.TestCase):
                         self.dataset,
                         localId, jsonFilename)
                 else:
-                    self.assertTrue(protocol.BioSample.validate(jsonDict))
+                    self.assertTrue(protocol.Individual.validate(jsonDict))
 
 
 class TestBioSamples(unittest.TestCase):
