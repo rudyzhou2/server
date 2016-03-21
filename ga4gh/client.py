@@ -107,6 +107,15 @@ class AbstractClient(object):
         return self._runGetRequest(
             "biosamples", protocol.BioSample, bioSampleId)
 
+    def getIndividual(self, individualId):
+        """
+        Perform a get request for the given Individual.
+        :param individualId:
+        :return: protocol.Individual
+        """
+        return self._runGetRequest(
+            "individuals", protocol.Individual, individualId)
+
     def getPageSize(self):
         """
         Returns the suggested maximum size of pages of results returned by
@@ -416,6 +425,23 @@ class AbstractClient(object):
         request.pageSize = self._pageSize
         return self._runSearchRequest(
             request, "biosamples", protocol.SearchBioSamplesResponse)
+
+    def searchIndividuals(self, datasetId, name=None):
+        """
+        Returns an iterator over the Individuals optionally matching
+        a name for the given datasetId.
+
+        :param str name: Only Individuals given this name are returned
+        :return: An iterator over the :class:`ga4gh.protocol.Individual`
+            objects defined by the query parameters.
+        :rtype: iter
+        """
+        request = protocol.SearchIndividualsRequest()
+        request.datasetId = datasetId
+        request.name = name
+        request.pageSize = self._pageSize
+        return self._runSearchRequest(
+            request, "individuals", protocol.SearchIndividualsResponse)
 
     def searchReadGroupSets(self, datasetId, name=None, bioSampleId=None):
         """

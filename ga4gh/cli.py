@@ -483,6 +483,25 @@ class SearchBioSamplesRunner(AbstractSearchRunner):
             self._run(self._datasetId)
 
 
+class SearchIndividualsRunner(AbstractSearchRunner):
+    def __init__(self, args):
+        super(SearchIndividualsRunner, self).__init__(args)
+        self._datasetId = args.datasetId
+        self._name = args.name
+
+    def _run(self, datasetId):
+        iterator = self._client.searchIndividuals(
+            datasetId=datasetId,
+            name=self._name)
+        self._output(iterator)
+
+    def run(self):
+        if self._datasetId is None:
+            for dataset in self.getAllDatasets():
+                self._run(dataset.id)
+        else:
+            self._run(self._datasetId)
+
 class SearchVariantsRunner(VariantFormatterMixin, AbstractSearchRunner):
     """
     Runner class for the variants/search method.
@@ -724,6 +743,15 @@ class GetBioSamplesRunner(AbstractGetRunner):
     def __init__(self, args):
         super(GetBioSamplesRunner, self).__init__(args)
         self._method = self._client.getBioSample
+
+
+class GetIndividualsRunner(AbstractGetRunner):
+    """
+    Runner class for the individuals/{id} method
+    """
+    def __init__(self, args):
+        super(GetIndividualsRunner, self).__init__(args)
+        self._method = self._client.getIndividual
 
 
 def addDisableUrllibWarningsArgument(parser):
@@ -1053,8 +1081,31 @@ def addBioSampleSearchParser(subparsers):
 
 def addBioSampleGetParser(subparsers):
     parser = addSubparser(
-        subparsers, "biosamples-get", "Get a BioSamples")
+        subparsers, "biosamples-get", "Get a BioSample")
     parser.set_defaults(runner=GetBioSamplesRunner)
+    addUrlArgument(parser)
+    addOutputFormatArgument(parser)
+    addIdArgument(parser)
+    addPageSizeArgument(parser)
+    return parser
+
+
+def addIndividualSearchParser(subparsers):
+    parser = addSubparser(
+        subparsers, "individuals-search", "Search for BioSamples")
+    parser.set_defaults(runner=SearchIndividualsRunner)
+    addUrlArgument(parser)
+    addDatasetIdArgument(parser)
+    addOutputFormatArgument(parser)
+    addNameArgument(parser)
+    addPageSizeArgument(parser)
+    return parser
+
+
+def addIndividualGetParser(subparsers):
+    parser = addSubparser(
+        subparsers, "individuals-get", "Get an individual")
+    parser.set_defaults(runner=GetIndividualsRunner)
     addUrlArgument(parser)
     addOutputFormatArgument(parser)
     addIdArgument(parser)
@@ -1176,6 +1227,8 @@ def getClientParser():
     addReferencesBasesListParser(subparsers)
     addBioSampleSearchParser(subparsers)
     addBioSampleGetParser(subparsers)
+    addIndividualSearchParser(subparsers)
+    addIndividualGetParser(subparsers)
     return parser
 
 

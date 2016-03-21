@@ -186,7 +186,7 @@ class TestSearchMethodsCallRunRequest(unittest.TestCase):
         self.httpClient.searchIndividuals(
             self.datasetId, self.individualName)
         self.httpClient._runSearchRequest.assert_called_once_with(
-            request, "biosamples", protocol.SearchIndividualsResponse)
+            request, "individuals", protocol.SearchIndividualsResponse)
 
     def testGetReferenceSet(self):
         self.httpClient.getReferenceSet(self.objectId)
@@ -242,7 +242,7 @@ class TestSearchMethodsCallRunRequest(unittest.TestCase):
     def testGetIndividual(self):
         self.httpClient.getIndividual(self.objectId)
         self.httpClient._runGetRequest.assert_called_once_with(
-            "individuals", protocol.BioSample, self.objectId)
+            "individuals", protocol.Individual, self.objectId)
 
 
 class DatamodelObjectWrapper(object):
