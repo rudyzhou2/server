@@ -1598,6 +1598,29 @@ class RemoveBioSampleRunner(AbstractRepoDatasetCommandRunner):
             func, 'BioSample {}'.format(self.bioSampleName))
 
 
+class AddIndividualRunner(AbstractRepoDatasetFilepathCommandRunner):
+
+    def __init__(self, args):
+        super(AddIndividualRunner, self).__init__(args)
+
+    def run(self):
+        self.repoManager.addIndividual(
+            self.datasetName, self.filePath, self.moveMode)
+
+
+class RemoveIndividualRunner(AbstractRepoDatasetCommandRunner):
+
+    def __init__(self, args):
+        super(RemoveIndividualRunner, self).__init__(args)
+        self.individualName = args.individualName
+
+    def run(self):
+        def func():
+            self.repoManager.removeIndividual(
+                self.datasetName, self.individualName)
+        self.confirmRun(
+            func, 'Individual {}'.format(self.individualName))
+
 def addRepoArgument(subparser):
     subparser.add_argument(
         "repoPath", help="the file path of the data repository")
@@ -1624,6 +1647,12 @@ def addBioSampleNameArgument(subparser):
     subparser.add_argument(
         "bioSampleName",
         help="the name of the BioSample")
+
+
+def addIndividualNameArgument(subparser):
+    subparser.add_argument(
+        "individualName",
+        help="the name of the Individual")
 
 
 def addReadGroupSetNameArgument(subparser):
@@ -1774,8 +1803,24 @@ def getRepoParser():
     addDatasetNameArgument(addBioSampleParser)
     addFilePathArgument(addBioSampleParser)
     addMoveModeArgument(addBioSampleParser)
-    return parser
 
+    removeIndividualParser = addSubparser(
+        subparsers, "remove-individual",
+        "Remove an individual from the repo")
+    removeIndividualParser.set_defaults(runner=RemoveIndividualRunner)
+    addRepoArgument(removeIndividualParser)
+    addDatasetNameArgument(removeIndividualParser)
+    addIndividualNameArgument(removeIndividualParser)
+    addForceArgument(removeIndividualParser)
+
+    addIndividualParser = addSubparser(
+        subparsers, "add-individual",
+        "Add a biosample to the repo")
+    addIndividualParser.set_defaults(runner=AddIndividualRunner)
+    addRepoArgument(addIndividualParser)
+    addDatasetNameArgument(addIndividualParser)
+    addFilePathArgument(addIndividualParser)
+    addMoveModeArgument(addIndividualParser)
     return parser
 
 

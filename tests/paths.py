@@ -30,11 +30,14 @@ biodataDir = os.path.join(
 individualsDir = os.path.join(biodataDir, 'individuals')
 individualPath = os.path.join(individualsDir, 'HG00096.json')
 individualName = "HG00096"
+
 bioSamplesDir = os.path.join(biodataDir, 'biosamples')
 bioSamplePath = os.path.join(bioSamplesDir, 'HG00096.json')
 
 testIndividualsDataDir = os.path.join(
     testDir, 'faultydata/biodata/individuals')
+malformedIndividualPath = os.path.join(
+    testIndividualsDataDir, 'malformed.json')
 testBioSamplesDataDir = os.path.join(
     testDir, 'faultydata/biodata/biosamples')
 malformedBioSamplePath = os.path.join(

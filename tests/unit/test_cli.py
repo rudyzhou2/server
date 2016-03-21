@@ -431,11 +431,11 @@ class TestRepoManagerCli(unittest.TestCase):
         args = self.parser.parse_args(cliInput.split())
         self.assertEquals(args.repoPath, self.repoPath)
         self.assertEquals(args.datasetName, self.datasetName)
-        self.assertEquals(args.bioSampleName, individualName)
+        self.assertEquals(args.individualName, individualName)
         self.assertEquals(args.runner, cli.RemoveIndividualRunner)
         self.assertEquals(args.force, False)
 
-    def testAddndividual(self):
+    def testAddIndividual(self):
         cliInput = "add-individual {} {} {} --moveMode=move".format(
             self.repoPath, self.datasetName, self.filePath)
         args = self.parser.parse_args(cliInput.split())

@@ -63,7 +63,7 @@ class RepoManagerTest(AbstractRepoManagerTest):
         self.repoManager.removeDataset(datasetName)
 
 
-class RepoManagerInidividualCommandTest(AbstractRepoManagerTest):
+class RepoManagerIndividualCommandTest(AbstractRepoManagerTest):
     """
     Tests for individiual repo manager commands
     """
@@ -230,9 +230,9 @@ class RepoManagerInidividualCommandTest(AbstractRepoManagerTest):
     def testRemoveIndividual(self):
         self.repoManager.addDataset('dataset1')
         self.repoManager.addIndividual(
-            'dataset1', paths.bioIndividualPath, 'link')
+            'dataset1', paths.individualPath, 'link')
         self.repoManager.removeIndividual(
-            'dataset1', paths.bioSampleName)
+            'dataset1', paths.individualName)
         with self.assertRaises(exceptions.RepoManagerException):
             self.repoManager.removeIndividual(
                 'dataset1', paths.individualName)

@@ -243,8 +243,9 @@ class FileSystemDataset(AbstractDataset):
     """
     variantsDirName = "variants"
     readsDirName = "reads"
-    bioDataDirName = "biodata"
-    bioSamplesDirName = bioDataDirName + "/biosamples"
+    biodataDirName = "biodata"
+    bioSamplesDirName = biodataDirName + "/biosamples"
+    individualsDirName = biodataDirName + "/individuals"
 
     def __init__(self, localId, dataDir, dataRepository):
         super(FileSystemDataset, self).__init__(localId)

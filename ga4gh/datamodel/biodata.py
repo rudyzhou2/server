@@ -111,11 +111,11 @@ class JsonBioSample(AbstractBioSample, datamodel.MetadataSidecarMixin):
 
 class AbstractIndividual(datamodel.DatamodelObject):
     """
-    This class represents an abstract BioSample object.
+    This class represents an abstract Individual object.
     It sets default values and getters, as well as the
     toProtocolElement function.
     """
-    compoundIdClass = datamodel.BioSampleCompoundId
+    compoundIdClass = datamodel.IndividualCompoundId
 
     def __init__(self, parentContainer, localId):
         super(AbstractIndividual, self).__init__(parentContainer, localId)
@@ -128,16 +128,16 @@ class AbstractIndividual(datamodel.DatamodelObject):
         self._name = localId
 
     def toProtocolElement(self):
-        individual = protocol.Individual()
-        individual.createDateTime = self.getCreateDateTime()
-        individual.description = self.getDescription()
-        individual.species = self.getSpecies()
-        individual.sex = self.getSex()
-        individual.id = self.getId()
-        individual.info = self.getInfo()
-        individual.name = self.getName()
-        individual.updateDateTime = self.getUpdateDateTime()
-        return individual
+        gaIndividual = protocol.Individual()
+        gaIndividual.createDateTime = self.getCreateDateTime()
+        gaIndividual.updateDateTime = self.getUpdateDateTime()
+        gaIndividual.description = self.getDescription()
+        gaIndividual.species = self.getSpecies()
+        gaIndividual.sex = self.getSex()
+        gaIndividual.id = self.getId()
+        gaIndividual.info = self.getInfo()
+        gaIndividual.name = self.getName()
+        return gaIndividual
 
     def getCreateDateTime(self):
         return self._createDateTime
@@ -195,10 +195,14 @@ class JsonIndividual(AbstractIndividual, datamodel.MetadataSidecarMixin):
         return self._getField('description')
 
     def getSpecies(self):
-        return self._getField('species')
+        species = protocol.OntologyTerm().fromJsonDict(
+            self._getField('species'))
+        return species
 
     def getSex(self):
-        return self._getField('sex')
+        sex = protocol.OntologyTerm().fromJsonDict(
+            self._getField('sex'))
+        return sex
 
     def getInfo(self):
         return self._getField('info')
