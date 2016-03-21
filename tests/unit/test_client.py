@@ -33,8 +33,10 @@ class TestSearchMethodsCallRunRequest(unittest.TestCase):
         self.referenceId = "referenceId"
         self.readGroupIds = ["readGroupId"]
         self.referenceName = "referenceName"
+        self.bioSampleId = "bioSampleId"
         self.bioSampleName = "bioSampleName"
         self.individualName = "individualName"
+        self.individualId = "individualId"
         self.start = 100
         self.end = 101
         self.referenceName = "referenceName"
@@ -140,8 +142,9 @@ class TestSearchMethodsCallRunRequest(unittest.TestCase):
         request.datasetId = self.datasetId
         request.name = self.objectName
         request.pageSize = self.pageSize
+        request.bioSampleId = self.bioSampleId
         self.httpClient.searchReadGroupSets(
-            self.datasetId, name=self.objectName)
+            self.datasetId, name=self.objectName, bioSampleId=self.bioSampleId)
         self.httpClient._runSearchRequest.assert_called_once_with(
             request, "readgroupsets", protocol.SearchReadGroupSetsResponse)
 
@@ -150,8 +153,11 @@ class TestSearchMethodsCallRunRequest(unittest.TestCase):
         request.variantSetId = self.variantSetId
         request.name = self.objectName
         request.pageSize = self.pageSize
+        request.bioSampleId = self.bioSampleId
         self.httpClient.searchCallSets(
-            self.variantSetId, name=self.objectName)
+            self.variantSetId,
+            name=self.objectName,
+            bioSampleId=self.bioSampleId)
         self.httpClient._runSearchRequest.assert_called_once_with(
             request, "callsets", protocol.SearchCallSetsResponse)
 
@@ -172,9 +178,10 @@ class TestSearchMethodsCallRunRequest(unittest.TestCase):
         request = protocol.SearchBioSamplesRequest()
         request.datasetId = self.datasetId
         request.name = self.bioSampleName
+        request.individualId = self.individualId
         request.pageSize = self.pageSize
         self.httpClient.searchBioSamples(
-            self.datasetId, self.bioSampleName)
+            self.datasetId, self.bioSampleName, self.individualId)
         self.httpClient._runSearchRequest.assert_called_once_with(
             request, "biosamples", protocol.SearchBioSamplesResponse)
 

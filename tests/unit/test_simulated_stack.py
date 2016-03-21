@@ -911,7 +911,7 @@ class TestSimulatedStack(unittest.TestCase):
         request = protocol.SearchIndividualsRequest()
         request.datasetId = dataset.getId()
         responseData = self.sendSearchRequest(
-            path, request, protocol.SearchIndividualsResponse)
+            "individuals/search", request, protocol.SearchIndividualsResponse)
         self.assertGreater(
             len(responseData.individuals), 0,
             "Some individuals should be returned")
@@ -930,21 +930,21 @@ class TestSimulatedStack(unittest.TestCase):
     def testSearchIndividuals(self):
         path = 'individuals/search'
         dataset = self.dataRepo.getDatasets()[0]
-        request = protocol.SearchBioSamplesRequest()
+        request = protocol.SearchIndividualsRequest()
         request.name = "BAD NAME"
         request.datasetId = dataset.getId()
         responseData = self.sendSearchRequest(
-            path, request, protocol.SearchBioSamplesResponse)
-        self.assertGreater(
-            len(responseData.biosamples), 0,
+            path, request, protocol.SearchIndividualsResponse)
+        self.assertEqual(
+            len(responseData.individuals), 0,
             "A bad individual name should return none")
-        request = protocol.SearchBioSamplesRequest()
+        request = protocol.SearchIndividualsRequest()
         request.name = "simCallSet_0"
         request.datasetId = dataset.getId()
         responseData = self.sendSearchRequest(
-            path, request, protocol.SearchBioSamplesResponse)
+            path, request, protocol.SearchIndividualsResponse)
         self.assertGreater(
-            len(responseData.biosamples), 0,
+            len(responseData.individuals), 0,
             "A good individual name should return some")
 
     def testGetIndividual(self):
@@ -952,12 +952,13 @@ class TestSimulatedStack(unittest.TestCase):
         for dataset in self.dataRepo.getDatasets():
             for bioSampleId in dataset._bioSampleIdMap:
                 bioSample = dataset._bioSampleIdMap[bioSampleId]
-                print(bioSample.getIndividualId())
+
                 responseObject = self.sendGetObject(
                     path,
                     bioSample.getIndividualId(),
                     protocol.Individual)
-                self.assertEqual(responseObject.id, bioSample.getIndividualId())
+                self.assertEqual(
+                    responseObject.id, bioSample.getIndividualId())
         for badId in self.getBadIds():
             self.verifyGetMethodFails(path, badId)
 

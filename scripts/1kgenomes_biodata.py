@@ -23,9 +23,11 @@ def main():
         reader = csv.DictReader(csvfile)
         for row in reader:
             with open(
-                    "biodata/biosamples/" + row['Sample'] + ".json", 'w') as bioSampleOut, \
+                    "biodata/biosamples/" +
+                    row['Sample'] + ".json", 'w') as bioSampleOut, \
                 open(
-                    "biodata/individuals/" + row['Sample'] + ".json", 'w') as individualOut:
+                    "biodata/individuals/" +
+                    row['Sample'] + ".json", 'w') as individualOut:
                 description = "{} {} {}".format(
                     row['Population'],
                     row['Population Description'],

@@ -42,6 +42,12 @@ class AbstractBioSample(datamodel.DatamodelObject):
         return bioSample
 
     def getIndividualId(self):
+        """
+        Return a string identifier using the datasetId
+        and localId. LocalIds of individuals are expected
+        to have the same localId as a BioSample.
+        :return:
+        """
         datasetId = self.getParentContainer().getCompoundId()
         compoundId = datamodel.IndividualCompoundId(
             datasetId, self.getLocalId())
@@ -195,13 +201,17 @@ class JsonIndividual(AbstractIndividual, datamodel.MetadataSidecarMixin):
         return self._getField('description')
 
     def getSpecies(self):
-        species = protocol.OntologyTerm().fromJsonDict(
-            self._getField('species'))
+        species = self._getField('species')
+        if species:
+            species = protocol.OntologyTerm().fromJsonDict(
+                self._getField('species'))
         return species
 
     def getSex(self):
-        sex = protocol.OntologyTerm().fromJsonDict(
-            self._getField('sex'))
+        sex = self._getField('sex')
+        if sex:
+            sex = protocol.OntologyTerm().fromJsonDict(
+                self._getField('sex'))
         return sex
 
     def getInfo(self):

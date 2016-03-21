@@ -468,11 +468,13 @@ class SearchBioSamplesRunner(AbstractSearchRunner):
         super(SearchBioSamplesRunner, self).__init__(args)
         self._datasetId = args.datasetId
         self._name = args.name
+        self._individualId = args.individualId
 
     def _run(self, datasetId):
         iterator = self._client.searchBioSamples(
             datasetId=datasetId,
-            name=self._name)
+            name=self._name,
+            individualId=self._individualId)
         self._output(iterator)
 
     def run(self):
@@ -501,6 +503,7 @@ class SearchIndividualsRunner(AbstractSearchRunner):
                 self._run(dataset.id)
         else:
             self._run(self._datasetId)
+
 
 class SearchVariantsRunner(VariantFormatterMixin, AbstractSearchRunner):
     """
@@ -933,6 +936,12 @@ def addBioSampleIdArgument(subparser):
         help="the id of a BioSample")
 
 
+def addIndividualIdArgument(subparser):
+    subparser.add_argument(
+        "--individualId", default=None,
+        help="the id of an Individual")
+
+
 def addClientGlobalOptions(parser):
     parser.add_argument(
         '--verbose', '-v', action='count', default=0,
@@ -1075,6 +1084,7 @@ def addBioSampleSearchParser(subparsers):
     addDatasetIdArgument(parser)
     addOutputFormatArgument(parser)
     addNameArgument(parser)
+    addIndividualIdArgument(parser)
     addPageSizeArgument(parser)
     return parser
 
@@ -1673,6 +1683,7 @@ class RemoveIndividualRunner(AbstractRepoDatasetCommandRunner):
                 self.datasetName, self.individualName)
         self.confirmRun(
             func, 'Individual {}'.format(self.individualName))
+
 
 def addRepoArgument(subparser):
     subparser.add_argument(

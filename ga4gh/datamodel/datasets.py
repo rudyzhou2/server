@@ -314,22 +314,24 @@ class FileSystemDataset(AbstractDataset):
 
         # Biodata
         bioSamplesDir = os.path.join(dataDir, self.bioSamplesDirName)
-        for filename in os.listdir(bioSamplesDir):
-            if fnmatch.fnmatch(filename, '*.json'):
-                filepath = os.path.join(bioSamplesDir, filename)
-                localId, _ = os.path.splitext(filename)
-                bioSample = biodata.JsonBioSample(
-                    self, localId, filepath)
-                self.addBioSample(bioSample)
+        if os.path.exists(bioSamplesDir):
+            for filename in os.listdir(bioSamplesDir):
+                if fnmatch.fnmatch(filename, '*.json'):
+                    filepath = os.path.join(bioSamplesDir, filename)
+                    localId, _ = os.path.splitext(filename)
+                    bioSample = biodata.JsonBioSample(
+                        self, localId, filepath)
+                    self.addBioSample(bioSample)
 
         individualsDir = os.path.join(dataDir, self.individualsDirName)
-        for filename in os.listdir(individualsDir):
-            if fnmatch.fnmatch(filename, '*.json'):
-                filepath = os.path.join(individualsDir, filename)
-                localId, _ = os.path.splitext(filename)
-                individual = biodata.JsonIndividual(
-                    self, localId, filepath)
-                self.addIndividual(individual)
+        if os.path.exists(individualsDir):
+            for filename in os.listdir(individualsDir):
+                if fnmatch.fnmatch(filename, '*.json'):
+                    filepath = os.path.join(individualsDir, filename)
+                    localId, _ = os.path.splitext(filename)
+                    individual = biodata.JsonIndividual(
+                        self, localId, filepath)
+                    self.addIndividual(individual)
 
     def _setMetadata(self):
         metadataFileName = '{}.json'.format(self._dataDir)

@@ -428,8 +428,8 @@ class RepoManager(object):
         dataset = datasets.AbstractDataset('temp_ds')
         try:
             biodata.JsonBioSample(dataset, "name", filePath)
-        except exceptions.FileOpenFailedException:
-            message = "BioSample JSON is malformed"
+        except exceptions.FileOpenFailedException as error:
+            message = "BioSample JSON is malformed {}".format(error)
             raise exceptions.RepoManagerException(message)
         if not os.path.exists(destPath):
             os.makedirs(destPath)
@@ -466,8 +466,8 @@ class RepoManager(object):
         dataset = datasets.AbstractDataset('temp_ds')
         try:
             biodata.JsonIndividual(dataset, "name", filePath)
-        except exceptions.FileOpenFailedException:
-            message = "Individual JSON is malformed"
+        except exceptions.FileOpenFailedException as error:
+            message = "Individual JSON is malformed {}".format(error)
             raise exceptions.RepoManagerException(message)
         if not os.path.exists(destPath):
             os.makedirs(destPath)

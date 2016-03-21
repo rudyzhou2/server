@@ -107,6 +107,8 @@ dataset of that name. For example, we might have something like::
             biodata/
               biosamples/
                 # BioSample records
+              individuals/
+                # Individual records
         1kg-phase3
             variants/
                 # Variant data
@@ -115,6 +117,8 @@ dataset of that name. For example, we might have something like::
             biodata/
               biosamples/
                 # BioSample records
+              individuals/
+                # Individual records
 
 In this case we specify two datasets with name equal to ``1kg-phase1`` and
 ``1kg-phase3``. These directories contain the read and variant data
@@ -145,7 +149,8 @@ BioData
 +++++++
 
 A dataset may contain details regarding samples. This directory contains
-JSON files which map to the protocol definition for BioSamples.
+JSON files which map to the protocol definition for BioSamples and 
+Individuals.
 
 +++++++
 Example
@@ -189,6 +194,8 @@ An example layout might look like::
                   biosamples/
                     sample1.json
                     sample2.json
+                  individuals/
+                    individual1.json
 
 .. note:: Any change to the data repository (using the repository manager or
     otherwise) requires a restart of the server to be picked up by the
@@ -362,6 +369,27 @@ Removes a biosample from a given data repository and dataset.
 .. code-block:: bash
 
     $ ga4gh_repo remove-biosample path/to/datarepo aDataset aBioSample
+
++++++++++++++++
+add-individual
++++++++++++++++
+
+Add an individual record to the given data repository and dataset. Records
+should be described in JSON format according to the GA4GH protocol.
+
+.. code-block:: bash
+
+    $ ga4gh_repo add-individual path/to/datarepo aDataset path/to/aIndividual
+
++++++++++++++++++
+remove-individual
++++++++++++++++++
+
+Removes an individual from a given data repository and dataset.
+
+.. code-block:: bash
+
+    $ ga4gh_repo remove-biosample path/to/datarepo aDataset aIndividual
 
 ------------------
 Configuration file
