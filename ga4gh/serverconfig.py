@@ -43,27 +43,21 @@ class DevelopmentConfig(BaseConfig):
     DEBUG = True
 
 
-class SimulatedConfig(BaseConfig):
-    """
-    Configuration used for development.
-    """
-    SIMULATED_BACKEND_RANDOM_SEED = 0
-    SIMULATED_BACKEND_NUM_CALLS = 2000
-    SIMULATED_BACKEND_VARIANT_DENSITY = 0.5
-    SIMULATED_BACKEND_NUM_VARIANT_SETS = 10
-    SIMULATED_BACKEND_NUM_REFERENCE_SETS = 10
-    SIMULATED_BACKEND_NUM_REFERENCES_PER_REFERENCE_SET = 1
-    SIMULATED_BACKEND_NUM_ALIGNMENTS_PER_READ_GROUP = 500
-    SIMULATED_BACKEND_NUM_READ_GROUPS = 100
-    DATA_SOURCE = "simulated://"
-    DEBUG = True
-
-
 class LocalOidConfig(DevelopmentConfig):
     """
     Configuration used for developing against a local OIDC server
     """
     OIDC_PROVIDER = "https://localhost:8443"
+
+
+class SimulatedConfig(BaseConfig):
+    """
+    A configuration that uses simulated backing for testing.
+    """
+    DATA_SOURCE = "simulated://"
+    DEBUG = True
+    REQUEST_VALIDATION = True
+    RESPONSE_VALIDATION = True
 
 
 class ProductionConfig(BaseConfig):
