@@ -31,6 +31,7 @@ class RepoManagerEndToEndTest(unittest.TestCase):
 
     def _runCmd(self, cmd, *args):
         command = ["--loud", cmd, self.tempdir] + list(args)
+        print(command)
         cli.repo_main(command)
 
     def testEndToEnd(self):

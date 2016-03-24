@@ -354,11 +354,13 @@ add-biosample
 +++++++++++++++
 
 Add a BioSample record to the given data repository and dataset. Records
-should be described in JSON format according to the GA4GH protocol.
+should be described in JSON format according to the GA4GH protocol. To 
+associate this BioSample with an Individual record add the optional 
+individualName flag.
 
 .. code-block:: bash
 
-    $ ga4gh_repo add-biosample path/to/datarepo aDataset path/to/aBioSample
+    $ ga4gh_repo add-biosample path/to/datarepo aDataset path/to/aBioSample --individualName aName
 
 +++++++++++++++++
 remove-biosamples

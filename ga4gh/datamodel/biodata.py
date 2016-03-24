@@ -20,7 +20,7 @@ class AbstractBioSample(datamodel.DatamodelObject):
     """
     compoundIdClass = datamodel.BioSampleCompoundId
 
-    def __init__(self, parentContainer, localId):
+    def __init__(self, parentContainer, localId, individualName=None):
         super(AbstractBioSample, self).__init__(parentContainer, localId)
         self._createDateTime = datetime.datetime.now().isoformat()
         self._updateDateTime = datetime.datetime.now().isoformat()
@@ -28,6 +28,8 @@ class AbstractBioSample(datamodel.DatamodelObject):
         self._disease = None
         self._info = {}
         self._name = localId
+        self._individualName = individualName
+        self._individualId = None
 
     def toProtocolElement(self):
         bioSample = protocol.BioSample()
@@ -50,7 +52,7 @@ class AbstractBioSample(datamodel.DatamodelObject):
         """
         datasetId = self.getParentContainer().getCompoundId()
         compoundId = datamodel.IndividualCompoundId(
-            datasetId, self.getLocalId())
+            datasetId, self._individualName)
         return str(compoundId)
 
     def getCreateDateTime(self):
@@ -95,6 +97,9 @@ class JsonBioSample(AbstractBioSample, datamodel.MetadataSidecarMixin):
             return self.sidecar(fieldName)
         else:
             return self.__getattribute__('_' + fieldName)
+
+    def getIndividualId(self):
+        return self._getField('individualId')
 
     def getCreateDateTime(self):
         return self._getField('createDateTime')

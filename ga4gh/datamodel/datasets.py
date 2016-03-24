@@ -246,7 +246,7 @@ class SimulatedDataset(AbstractDataset):
             # Add biosamples
             for callSet in callSets:
                 bioSample = datamodel.biodata.AbstractBioSample(
-                    self, callSet.getLocalId())
+                    self, callSet.getLocalId(), callSet.getLocalId())
                 individual = datamodel.biodata.AbstractIndividual(
                     self, callSet.getLocalId())
                 self.addIndividual(individual)
@@ -264,7 +264,7 @@ class SimulatedDataset(AbstractDataset):
                 numReadGroupsPerReadGroupSet, numAlignments)
             for rg in readGroupSet.getReadGroups():
                 bioSample = datamodel.biodata.AbstractBioSample(
-                    self, rg.getLocalId())
+                    self, rg.getLocalId(), rg.getLocalId())
                 individual = datamodel.biodata.AbstractIndividual(
                     self, rg.getLocalId())
                 self.addIndividual(individual)

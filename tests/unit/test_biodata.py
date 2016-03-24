@@ -23,8 +23,9 @@ class TestIndividuals(unittest.TestCase):
     """
     Tests the JSON Individuals class
     """
+    dataset = datasets.AbstractDataset('dataset1')
+
     def testToProtocolElement(self):
-        self.dataset = datasets.AbstractDataset('dataset1')
         for localId in os.listdir(paths.testIndividualsDataDir):
             jsonFilename = os.path.join(paths.individualsDir, localId)
             jsonDict = {}
@@ -50,14 +51,22 @@ class TestIndividuals(unittest.TestCase):
                         localId, jsonFilename)
                 else:
                     self.assertTrue(protocol.Individual.validate(jsonDict))
+                    individual = biodata.JsonIndividual(
+                        self.dataset, localId, jsonFilename)
+                    gaIndividual = individual.toProtocolElement()
+                    for key in jsonDict:
+                        self.assertEqual(
+                            jsonDict[key],
+                            gaIndividual.__getattribute__(key))
 
 
 class TestBioSamples(unittest.TestCase):
     """
     Tests the JSON BioSamples class
     """
+    dataset = datasets.AbstractDataset('dataset1')
+
     def testToProtocolElement(self):
-        self.dataset = datasets.AbstractDataset('dataset1')
         for localId in os.listdir(paths.testBioSamplesDataDir):
             jsonFilename = os.path.join(paths.bioSamplesDir, localId)
             jsonDict = {}
@@ -82,3 +91,10 @@ class TestBioSamples(unittest.TestCase):
                         localId, jsonFilename)
                 else:
                     self.assertTrue(protocol.BioSample.validate(jsonDict))
+                    bioSample = biodata.JsonBioSample(
+                        self.dataset, localId, jsonFilename)
+                    gaBioSample = bioSample.toProtocolElement()
+                    for key in jsonDict:
+                        self.assertEqual(
+                            jsonDict[key],
+                            gaBioSample.__getattribute__(key))

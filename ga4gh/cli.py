@@ -942,6 +942,12 @@ def addIndividualIdArgument(subparser):
         help="the id of an Individual")
 
 
+def addOptionalIndividualNameArgument(subparser):
+    subparser.add_argument(
+        "--individualName", default=None,
+        help="the name of an Individual")
+
+
 def addClientGlobalOptions(parser):
     parser.add_argument(
         '--verbose', '-v', action='count', default=0,
@@ -1637,14 +1643,19 @@ class RemoveVariantSetRunner(AbstractRepoDatasetCommandRunner):
         self.confirmRun(func, 'variant set {}'.format(self.variantSetName))
 
 
-class AddBioSampleRunner(AbstractRepoDatasetFilepathCommandRunner):
+class AddBioSampleRunner(AbstractRepoCommandRunner):
 
     def __init__(self, args):
         super(AddBioSampleRunner, self).__init__(args)
+        self.individualName = args.individualName
+        self.filePath = args.filePath
+        self.datasetName = args.datasetName
 
     def run(self):
         self.repoManager.addBioSample(
-            self.datasetName, self.filePath, self.moveMode)
+            self.datasetName,
+            self.filePath,
+            self.individualName)
 
 
 class RemoveBioSampleRunner(AbstractRepoDatasetCommandRunner):
@@ -1866,7 +1877,7 @@ def getRepoParser():
     addRepoArgument(addBioSampleParser)
     addDatasetNameArgument(addBioSampleParser)
     addFilePathArgument(addBioSampleParser)
-    addMoveModeArgument(addBioSampleParser)
+    addOptionalIndividualNameArgument(addBioSampleParser)
 
     removeIndividualParser = addSubparser(
         subparsers, "remove-individual",

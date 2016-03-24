@@ -18,6 +18,7 @@ import ga4gh.exceptions as exceptions
 import ga4gh.datarepo as datarepo
 import ga4gh.datamodel.datasets as datasets
 import ga4gh.datamodel.biodata as biodata
+import ga4gh.datamodel as datamodel
 
 
 def getReferenceChecksum(fastaFile):
@@ -413,7 +414,7 @@ class RepoManager(object):
         self._repoEmit("ReferenceSet '{}' removed".format(
             referenceSetName))
 
-    def addBioSample(self, datasetName, filePath, moveMode):
+    def addBioSample(self, datasetName, filePath, individualName=None):
         """
         Add a BioSample
         """
@@ -425,7 +426,7 @@ class RepoManager(object):
             self.bioSamplesDirName)
         fullDest = os.path.join(destPath, fileName)
         self._checkFile(filePath, self.jsonExtension)
-        dataset = datasets.AbstractDataset('temp_ds')
+        dataset = datasets.AbstractDataset(datasetName)
         try:
             biodata.JsonBioSample(dataset, "name", filePath)
         except exceptions.FileOpenFailedException as error:
@@ -434,8 +435,19 @@ class RepoManager(object):
         if not os.path.exists(destPath):
             os.makedirs(destPath)
         self._assertPathEmpty(fullDest)
-        self._moveFile(filePath, fullDest, moveMode)
-
+        self._moveFile(filePath, fullDest, "copy")
+        if individualName is not None:
+            individualId = datamodel.IndividualCompoundId(
+                dataset.getCompoundId(), individualName)
+            try:
+                tempBioSample = None
+                with open(fullDest, 'r') as data:
+                    tempBioSample = json.load(data)
+                    tempBioSample['individualId'] = str(individualId)
+                with open(fullDest, 'w') as data:
+                    json.dump(tempBioSample, data)
+            except (ValueError, IOError):
+                raise exceptions.FileOpenFailedException(fullDest)
         # finish
         self._repoEmit("BioSample '{}' added to dataset '{}'".format(
             fileName, datasetName))

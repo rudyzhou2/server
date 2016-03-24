@@ -261,13 +261,20 @@ class TestClientJson(TestClientOutput):
                 iterator = self._client.searchBioSamples(
                     dataset.id, bioSample.name)
                 self.verifyParsedOutputsEqual(
-                    iterator, "biosamples-search", "--name {}".format(
+                    iterator,
+                    "biosamples-search",
+                    "--datasetId {} --name {}".format(
+                        dataset.id,
                         bioSample.name))
-                iterator = self._client.searchBioSamples(
-                    dataset.id, individualId=bioSample.individualId)
-                self.verifyParsedOutputsEqual(
-                    iterator, "biosamples-search", "--individualId {}".format(
-                        bioSample.individualId))
+                if bioSample.individualId:
+                    iterator = self._client.searchBioSamples(
+                        dataset.id, individualId=bioSample.individualId)
+                    self.verifyParsedOutputsEqual(
+                        iterator,
+                        "biosamples-search",
+                        "--datasetId {} --individualId {}".format(
+                            dataset.id,
+                            bioSample.individualId))
 
     def testSearchIndividuals(self):
         for dataset in self._client.searchDatasets():

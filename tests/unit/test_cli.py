@@ -415,13 +415,13 @@ class TestRepoManagerCli(unittest.TestCase):
         self.assertEquals(args.force, False)
 
     def testAddBioSample(self):
-        cliInput = "add-biosample {} {} {} --moveMode=move".format(
-            self.repoPath, self.datasetName, self.filePath)
+        cliInput = "add-biosample {} {} {} --individualName {}".format(
+            self.repoPath, self.datasetName, self.filePath, "individualName")
         args = self.parser.parse_args(cliInput.split())
         self.assertEquals(args.repoPath, self.repoPath)
         self.assertEquals(args.datasetName, self.datasetName)
         self.assertEquals(args.filePath, self.filePath)
-        self.assertEquals(args.moveMode, "move")
+        self.assertEquals(args.individualName, "individualName")
         self.assertEquals(args.runner, cli.AddBioSampleRunner)
 
     def testRemoveIndividual(self):
