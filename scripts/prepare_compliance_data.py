@@ -15,10 +15,14 @@ import sys
 import glob
 import pysam
 import utils
+import tempfile
+
+import ga4gh.repo_manager as repo_manager
 
 
 class ComplianceDataMunger(object):
     def __init__(self, args):
+        self.tempdir = None
         self.inputDirectory = args.inputDirectory
         self.outputDirectory = args.outputDirectory
 
@@ -66,6 +70,12 @@ class ComplianceDataMunger(object):
     def run(self):
         if not os.path.exists(self.outputDirectory):
             os.makedirs(self.outputDirectory)
+
+        ontologiesDir = os.path.join(self.outputDirectory, "ontologies")
+        sequenceOntologyDir = os.path.join(ontologiesDir, "sequence_ontology")
+        os.makedirs(sequenceOntologyDir)
+        shutil.copy(os.path.join(self.inputDirectory, "sequence_ontology.txt"),
+                    os.path.join(sequenceOntologyDir, "sequence_ontology.txt"))
 
         # Clean out, make and re-populate references directory
         # For now, assume a single, statically-named referenceSet
@@ -136,12 +146,62 @@ class ComplianceDataMunger(object):
                     # in place, creates a tabix index.
                     pysam.tabix_index(destFile, preset="vcf")
 
-        ontologiesDir = os.path.join(self.outputDirectory, "ontologies")
-        sequenceOntologyDir = os.path.join(ontologiesDir, "sequence_ontology")
-        os.makedirs(sequenceOntologyDir)
-        shutil.copy(os.path.join(self.inputDirectory, "sequence_ontology.txt"),
-                    os.path.join(sequenceOntologyDir, "sequence_ontology.txt"))
-        print("done converting compliance data.", file=sys.stderr)
+            # BioData
+            if self.tempdir is None:
+                self.tempdir = tempfile.mkdtemp()
+            repoManager = repo_manager.RepoManager(self.outputDirectory)
+            os.makedirs(os.path.join(self.tempdir, 'biosamples'))
+            os.makedirs(os.path.join(self.tempdir, 'individuals'))
+            shutil.copy(
+                os.path.join(self.inputDirectory, 'bioSample_HG00096.json'),
+                os.path.join(self.tempdir, 'biosamples', 'HG00096.json'))
+            shutil.copy(
+                os.path.join(self.inputDirectory, 'bioSample_HG00099.json'),
+                os.path.join(self.tempdir, 'biosamples', 'HG00099.json'))
+            shutil.copy(
+                os.path.join(self.inputDirectory, 'bioSample_HG00101.json'),
+                os.path.join(self.tempdir, 'biosamples', 'HG00101.json'))
+            shutil.copy(
+                os.path.join(self.inputDirectory, 'individual_HG00096.json'),
+                os.path.join(self.tempdir, 'individuals', 'HG00096.json'))
+            shutil.copy(
+                os.path.join(self.inputDirectory, 'individual_HG00099.json'),
+                os.path.join(self.tempdir, 'individuals', 'HG00099.json'))
+            shutil.copy(
+                os.path.join(self.inputDirectory, 'individual_HG00101.json'),
+                os.path.join(self.tempdir, 'individuals', 'HG00101.json'))
+            outputBioDataDir = os.path.join(
+                dsdir, "biodata")
+            outputBioSamplesDir = os.path.join(
+                outputBioDataDir, "biosamples")
+            outputIndividualsDir = os.path.join(
+                outputBioDataDir, "individuals")
+            os.makedirs(outputBioDataDir)
+            os.makedirs(outputBioSamplesDir)
+            os.makedirs(outputIndividualsDir)
+            tempBioSamplesDir = os.path.join(
+                self.tempdir, 'biosamples')
+            tempIndividualsDir = os.path.join(
+                self.tempdir, 'individuals')
+            print(os.path.exists(os.path.join(
+                self.tempdir, 'individuals', 'HG00096.json')))
+            repoManager.addIndividual(
+                ds, os.path.join(tempIndividualsDir, 'HG00096.json'), "copy")
+            repoManager.addIndividual(
+                ds, os.path.join(tempIndividualsDir, 'HG00099.json'), "copy")
+            repoManager.addIndividual(
+                ds, os.path.join(tempIndividualsDir, 'HG00101.json'), "copy")
+            repoManager.addBioSample(
+                ds, os.path.join(tempBioSamplesDir, 'HG00096.json'), 'HG00096')
+            repoManager.addBioSample(
+                ds, os.path.join(tempBioSamplesDir, 'HG00099.json'), 'HG00099')
+            repoManager.addBioSample(
+                ds, os.path.join(tempBioSamplesDir, 'HG00101.json'), 'HG00101')
+
+    def cleanup(self):
+        if self.tempdir is not None:
+            shutil.rmtree(self.tempdir)
+        utils.log("Done converting compliance data.")
 
 
 @utils.Timed()
@@ -158,8 +218,11 @@ def main():
         default='.')
     parser.add_argument('--verbose', '-v', action='count', default=0)
     args = parser.parse_args()
-    cdm = ComplianceDataMunger(args)
-    cdm.run()
+    try:
+        cdm = ComplianceDataMunger(args)
+        cdm.run()
+    finally:
+        cdm.cleanup()
 
 if __name__ == "__main__":
     main()

@@ -484,7 +484,7 @@ class Backend(object):
     def _bioSampleObjectGenerator(self, request, numObjects, getByIndexMethod):
         """
         Function for iterating through biosamples that optionally
-        filters by a name provided in the request.
+        filters by a name and individualId provided in the request.
         """
         currentIndex = 0
         if request.pageToken is not None:
@@ -495,11 +495,39 @@ class Backend(object):
             nextPageToken = None
             if currentIndex < numObjects:
                 nextPageToken = str(currentIndex)
-            if request.name:
-                if request.name == bioSample.name:
+            if request.name or request.individualId:
+                if (request.name == bioSample.name) and (
+                            request.individualId == bioSample.individualId):
+                    yield bioSample, nextPageToken
+                if (request.name and not request.individualId) and (
+                            request.name == bioSample.name):
+                    yield bioSample, nextPageToken
+                if (request.individualId and not request.name) and (
+                            request.individualId == bioSample.individualId):
                     yield bioSample, nextPageToken
             else:
                 yield bioSample, nextPageToken
+
+    def _individualObjectGenerator(
+            self, request, numObjects, getByIndexMethod):
+        """
+        Function for iterating through individuals that optionally
+        filters by a name provided in the request.
+        """
+        currentIndex = 0
+        if request.pageToken is not None:
+            currentIndex, = _parsePageToken(request.pageToken, 1)
+        while currentIndex < numObjects:
+            individual = getByIndexMethod(currentIndex).toProtocolElement()
+            currentIndex += 1
+            nextPageToken = None
+            if currentIndex < numObjects:
+                nextPageToken = str(currentIndex)
+            if request.name and request.name != "":
+                if request.name == individual.name:
+                    yield individual, nextPageToken
+            else:
+                yield individual, nextPageToken
 
     def _objectListGenerator(self, request, objectList):
         """
@@ -523,6 +551,12 @@ class Backend(object):
         return self._bioSampleObjectGenerator(
             request, dataset.getNumBioSamples(),
             dataset.getBioSampleByIndex)
+
+    def individualsGenerator(self, request):
+        dataset = self.getDataRepository().getDataset(request.datasetId)
+        return self._individualObjectGenerator(
+            request, dataset.getNumIndividuals(),
+            dataset.getIndividualByIndex)
 
     def readGroupSetsGenerator(self, request):
         """
@@ -814,12 +848,21 @@ class Backend(object):
 
     def runGetBioSample(self, id_):
         """
-        Runs a getVariantSet request for the specified ID.
+        Runs a getBioSample request for the specified ID.
         """
         compoundId = datamodel.BioSampleCompoundId.parse(id_)
         dataset = self.getDataRepository().getDataset(compoundId.datasetId)
         bioSample = dataset.getBioSample(id_)
         return self.runGetRequest(bioSample)
+
+    def runGetIndividual(self, id_):
+        """
+        Runs a getIndividual request for the specified ID.
+        """
+        compoundId = datamodel.BioSampleCompoundId.parse(id_)
+        dataset = self.getDataRepository().getDataset(compoundId.datasetId)
+        individual = dataset.getIndividual(id_)
+        return self.runGetRequest(individual)
 
     def runGetDataset(self, id_):
         """
@@ -848,9 +891,18 @@ class Backend(object):
             protocol.SearchReadGroupSetsResponse,
             self.readGroupSetsGenerator)
 
+    def runSearchIndividuals(self, request):
+        """
+        Runs the specified search SearchIndividualsRequest.
+        """
+        return self.runSearchRequest(
+            request, protocol.SearchIndividualsRequest,
+            protocol.SearchIndividualsResponse,
+            self.individualsGenerator)
+
     def runSearchBioSamples(self, request):
         """
-        Runs the specified SearchReadsRequest.
+        Runs the specified SearchBioSamplesRequest.
         """
         return self.runSearchRequest(
             request, protocol.SearchBioSamplesRequest,

@@ -63,7 +63,7 @@ class RepoManagerTest(AbstractRepoManagerTest):
         self.repoManager.removeDataset(datasetName)
 
 
-class RepoManagerInidividualCommandTest(AbstractRepoManagerTest):
+class RepoManagerIndividualCommandTest(AbstractRepoManagerTest):
     """
     Tests for individiual repo manager commands
     """
@@ -186,19 +186,19 @@ class RepoManagerInidividualCommandTest(AbstractRepoManagerTest):
     def testAddBioSample(self):
         with self.assertRaises(exceptions.RepoManagerException):
             self.repoManager.addBioSample(
-                'dataset1', paths.bioSamplePath, 'link')
+                'dataset1', paths.bioSamplePath, 'individualName')
         self.repoManager.addDataset('dataset1')
         with self.assertRaises(exceptions.RepoManagerException):
             self.repoManager.addBioSample(
-                'dataset1', paths.malformedBioSamplePath, 'link')
+                'dataset1', paths.malformedBioSamplePath, 'individualName')
         self.repoManager.addDataset('dataset2')
         self.repoManager.addBioSample(
-            'dataset1', paths.bioSamplePath, 'link')
+            'dataset1', paths.bioSamplePath, 'individualName')
         self.repoManager.addBioSample(
-            'dataset2', paths.bioSamplePath, 'link')
+            'dataset2', paths.bioSamplePath, 'individualName')
         with self.assertRaises(exceptions.RepoManagerException):
             self.repoManager.addBioSample(
-                'dataset1', paths.bioSamplePath, 'link')
+                'dataset1', paths.bioSamplePath, 'individualName')
 
     def testRemoveBioSample(self):
         self.repoManager.addDataset('dataset1')
@@ -209,3 +209,30 @@ class RepoManagerInidividualCommandTest(AbstractRepoManagerTest):
         with self.assertRaises(exceptions.RepoManagerException):
             self.repoManager.removeBioSample(
                 'dataset1', paths.bioSampleName)
+
+    def testAddIndividual(self):
+        with self.assertRaises(exceptions.RepoManagerException):
+            self.repoManager.addIndividual(
+                'dataset1', paths.individualPath, 'link')
+        self.repoManager.addDataset('dataset1')
+        with self.assertRaises(exceptions.RepoManagerException):
+            self.repoManager.addIndividual(
+                'dataset1', paths.malformedIndividualPath, 'link')
+        self.repoManager.addDataset('dataset2')
+        self.repoManager.addIndividual(
+            'dataset1', paths.individualPath, 'link')
+        self.repoManager.addIndividual(
+            'dataset2', paths.individualPath, 'link')
+        with self.assertRaises(exceptions.RepoManagerException):
+            self.repoManager.addIndividual(
+                'dataset1', paths.individualPath, 'link')
+
+    def testRemoveIndividual(self):
+        self.repoManager.addDataset('dataset1')
+        self.repoManager.addIndividual(
+            'dataset1', paths.individualPath, 'link')
+        self.repoManager.removeIndividual(
+            'dataset1', paths.individualName)
+        with self.assertRaises(exceptions.RepoManagerException):
+            self.repoManager.removeIndividual(
+                'dataset1', paths.individualName)

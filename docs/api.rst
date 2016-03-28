@@ -94,6 +94,9 @@ BioData
 .. autoclass:: ga4gh.protocol.BioSample
     :members:
 
+.. autoclass:: ga4gh.protocol.Individual
+    :members:
+
 ----------
 Client API
 ----------
@@ -104,8 +107,8 @@ Client API
     :members: getReferenceSet, getReference,
         getDataset, getVariantSet, getVariant,
         getReadGroupSet, getReadGroup,
-        getBioSample,
+        getBioSample, getIndividual,
         searchDatasets, searchReferenceSets, searchReferences,
         searchVariantSets, searchVariants, searchReadGroupSets,
-        searchReads, searchBioSamples
+        searchReads, searchBioSamples, searchIndividuals
 

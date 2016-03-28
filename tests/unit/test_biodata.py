@@ -19,12 +19,54 @@ import ga4gh.avrotools as avrotools
 import tests.paths as paths
 
 
+class TestIndividuals(unittest.TestCase):
+    """
+    Tests the JSON Individuals class
+    """
+    dataset = datasets.AbstractDataset('dataset1')
+
+    def testToProtocolElement(self):
+        for localId in os.listdir(paths.testIndividualsDataDir):
+            jsonFilename = os.path.join(paths.individualsDir, localId)
+            jsonDict = {}
+            try:
+                with open(jsonFilename) as data:
+                    jsonDict = json.load(data)
+            except (ValueError, IOError):
+                # Poorly formed JSON throws expected exception
+                self.assertRaises(
+                    exceptions.FileOpenFailedException,
+                    biodata.JsonIndividual,
+                    self.dataset, localId, jsonFilename)
+            if jsonDict != {}:
+                jsonDict['id'] = str(
+                    datamodel.IndividualCompoundId(
+                        self.dataset._compoundId, localId))
+                validator = avrotools.Validator(protocol.Individual)
+                if validator.getInvalidFields(jsonDict) != {}:
+                    self.assertRaises(
+                        exceptions.FileOpenFailedException,
+                        biodata.JsonIndividual,
+                        self.dataset,
+                        localId, jsonFilename)
+                else:
+                    self.assertTrue(protocol.Individual.validate(jsonDict))
+                    individual = biodata.JsonIndividual(
+                        self.dataset, localId, jsonFilename)
+                    gaIndividual = individual.toProtocolElement()
+                    for key in jsonDict:
+                        self.assertEqual(
+                            jsonDict[key],
+                            gaIndividual.__getattribute__(key))
+
+
 class TestBioSamples(unittest.TestCase):
     """
-    Tests the datasets class
+    Tests the JSON BioSamples class
     """
+    dataset = datasets.AbstractDataset('dataset1')
+
     def testToProtocolElement(self):
-        self.dataset = datasets.AbstractDataset('dataset1')
         for localId in os.listdir(paths.testBioSamplesDataDir):
             jsonFilename = os.path.join(paths.bioSamplesDir, localId)
             jsonDict = {}
@@ -49,3 +91,10 @@ class TestBioSamples(unittest.TestCase):
                         localId, jsonFilename)
                 else:
                     self.assertTrue(protocol.BioSample.validate(jsonDict))
+                    bioSample = biodata.JsonBioSample(
+                        self.dataset, localId, jsonFilename)
+                    gaBioSample = bioSample.toProtocolElement()
+                    for key in jsonDict:
+                        self.assertEqual(
+                            jsonDict[key],
+                            gaBioSample.__getattribute__(key))

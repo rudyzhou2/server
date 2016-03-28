@@ -232,6 +232,14 @@ class BioSampleCompoundId(CompoundId):
     containerIds = DatasetCompoundId.containerIds + [('bioSampleId', 1)]
 
 
+class IndividualCompoundId(CompoundId):
+    """
+    The compound id for a data set
+    """
+    fields = DatasetCompoundId.fields + ['individual']
+    containerIds = DatasetCompoundId.containerIds + [('individualId', 1)]
+
+
 class VariantSetCompoundId(DatasetCompoundId):
     """
     The compound id for a variant set

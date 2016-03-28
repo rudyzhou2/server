@@ -18,6 +18,7 @@ import ga4gh.exceptions as exceptions
 import ga4gh.datarepo as datarepo
 import ga4gh.datamodel.datasets as datasets
 import ga4gh.datamodel.biodata as biodata
+import ga4gh.datamodel as datamodel
 
 
 def getReferenceChecksum(fastaFile):
@@ -72,8 +73,9 @@ class RepoManager(object):
         datarepo.FileSystemDataRepository.referenceSetsDirName
     readsDirName = datasets.FileSystemDataset.readsDirName
     variantsDirName = datasets.FileSystemDataset.variantsDirName
-    bioDataDirName = datasets.FileSystemDataset.bioDataDirName
+    biodataDirName = datasets.FileSystemDataset.biodataDirName
     bioSamplesDirName = datasets.FileSystemDataset.bioSamplesDirName
+    individualsDirName = datasets.FileSystemDataset.individualsDirName
     fastaExtension = '.fa.gz'
     fastaIndexExtensionFai = '.fa.gz.fai'
     fastaIndexExtensionGzi = '.fa.gz.gzi'
@@ -92,8 +94,9 @@ class RepoManager(object):
         self._datasetStructure = [
             self.readsDirName,
             self.variantsDirName,
-            self.bioDataDirName,
-            self.bioSamplesDirName]
+            self.biodataDirName,
+            self.bioSamplesDirName,
+            self.individualsDirName]
 
     def _assertFileExists(
             self, filePath, text='File', inRepo=False, emitName=None):
@@ -161,6 +164,14 @@ class RepoManager(object):
             datasetName,
             self.bioSamplesDirName)
         return bioSamplesPath
+
+    def _getIndividualsPath(self, datasetName):
+        individualsPath = os.path.join(
+            self._repoPath,
+            self.datasetsDirName,
+            datasetName,
+            self.individualsDirName)
+        return individualsPath
 
     def _getReferenceSetJsonPath(self, referenceSetName):
         jsonPath = os.path.join(
@@ -403,7 +414,7 @@ class RepoManager(object):
         self._repoEmit("ReferenceSet '{}' removed".format(
             referenceSetName))
 
-    def addBioSample(self, datasetName, filePath, moveMode):
+    def addBioSample(self, datasetName, filePath, individualName=None):
         """
         Add a BioSample
         """
@@ -415,17 +426,28 @@ class RepoManager(object):
             self.bioSamplesDirName)
         fullDest = os.path.join(destPath, fileName)
         self._checkFile(filePath, self.jsonExtension)
-        dataset = datasets.AbstractDataset('temp_ds')
+        dataset = datasets.AbstractDataset(datasetName)
         try:
             biodata.JsonBioSample(dataset, "name", filePath)
-        except exceptions.FileOpenFailedException:
-            message = "BioSample JSON is malformed"
+        except exceptions.FileOpenFailedException as error:
+            message = "BioSample JSON is malformed {}".format(error)
             raise exceptions.RepoManagerException(message)
         if not os.path.exists(destPath):
             os.makedirs(destPath)
         self._assertPathEmpty(fullDest)
-        self._moveFile(filePath, fullDest, moveMode)
-
+        self._moveFile(filePath, fullDest, "copy")
+        if individualName is not None:
+            individualId = datamodel.IndividualCompoundId(
+                dataset.getCompoundId(), individualName)
+            try:
+                tempBioSample = None
+                with open(fullDest, 'r') as data:
+                    tempBioSample = json.load(data)
+                    tempBioSample['individualId'] = str(individualId)
+                with open(fullDest, 'w') as data:
+                    json.dump(tempBioSample, data)
+            except (ValueError, IOError):
+                raise exceptions.FileOpenFailedException(fullDest)
         # finish
         self._repoEmit("BioSample '{}' added to dataset '{}'".format(
             fileName, datasetName))
@@ -439,6 +461,44 @@ class RepoManager(object):
         self._assertFileExists(filePath, inRepo=True)
         self._removePath(filePath)
         self._repoEmit("BioSample '{}' removed".format(
+            filePath))
+
+    def addIndividual(self, datasetName, filePath, moveMode):
+        """
+        Add an individual
+        """
+        self._check()
+        self._checkDataset(datasetName)
+        fileName = os.path.basename(filePath)
+        destPath = os.path.join(
+            self._repoPath, self.datasetsDirName, datasetName,
+            self.individualsDirName)
+        fullDest = os.path.join(destPath, fileName)
+        self._checkFile(filePath, self.jsonExtension)
+        dataset = datasets.AbstractDataset('temp_ds')
+        try:
+            biodata.JsonIndividual(dataset, "name", filePath)
+        except exceptions.FileOpenFailedException as error:
+            message = "Individual JSON is malformed {}".format(error)
+            raise exceptions.RepoManagerException(message)
+        if not os.path.exists(destPath):
+            os.makedirs(destPath)
+        self._assertPathEmpty(fullDest)
+        self._moveFile(filePath, fullDest, moveMode)
+
+        # finish
+        self._repoEmit("Individual '{}' added to dataset '{}'".format(
+            fileName, datasetName))
+
+    def removeIndividual(self, datasetName, individualName):
+        self._check()
+        self._checkDataset(datasetName)
+        individualsPath = self._getIndividualsPath(datasetName)
+        filePath = os.path.join(individualsPath, individualName + ".json")
+        self._assertDirectory(individualsPath)
+        self._assertFileExists(filePath, inRepo=True)
+        self._removePath(filePath)
+        self._repoEmit("Individual '{}' removed".format(
             filePath))
 
     def addReadGroupSet(self, datasetName, filePath, moveMode):
