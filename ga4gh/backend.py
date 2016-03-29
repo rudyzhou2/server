@@ -497,7 +497,7 @@ class Backend(object):
             nextPageToken = None
             if currentIndex < numObjects and recur:
                 request.pageToken = str(currentIndex)
-                for bioSample, pageToken in self._bioSampleObjectGenerator(
+                for bs, pageToken in self._bioSampleObjectGenerator(
                        request, numObjects, getByIndexMethod, False):
                     nextPageToken = str(currentIndex)
                     break

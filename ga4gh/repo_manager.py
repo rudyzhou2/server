@@ -627,3 +627,9 @@ class RepoManager(object):
                 self._emitIndent(variantSet.getLocalId(), 3)
                 for chromFile in sorted(variantSet._chromFileMap.keys()):
                     self._emitIndent(chromFile, 4)
+            self._emitIndent(self.bioSamplesDirName, 2)
+            for bioSample in dataset.getBioSamples():
+                self._emitIndent(bioSample.getLocalId(), 3)
+            self._emitIndent(self.individualsDirName, 2)
+            for individual in dataset.getIndividuals():
+                self._emitIndent(individual.getLocalId(), 3)
