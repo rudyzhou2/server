@@ -102,7 +102,8 @@ class AbstractClient(object):
         """
         Perform a get request for the given BioSample.
         :param bioSampleId:
-        :return: protocol.BioSample
+        :return: The requested BioSample.
+        :rtype: :class: `ga4gh.protocol.BioSample`
         """
         return self._runGetRequest(
             "biosamples", protocol.BioSample, bioSampleId)
@@ -111,7 +112,8 @@ class AbstractClient(object):
         """
         Perform a get request for the given Individual.
         :param individualId:
-        :return: protocol.Individual
+        :return: The requested Individual.
+        :rtype: :class: `ga4gh.protocol.Individual`
         """
         return self._runGetRequest(
             "individuals", protocol.Individual, individualId)
@@ -397,7 +399,7 @@ class AbstractClient(object):
         :param str name: Only CallSets matching the specified name will
             be returned.
         :param str bioSampleId: Returns only callsets with the given
-            Id.
+            bioSampleId.
         :return: An iterator over the :class:`ga4gh.protocol.CallSet`
             objects defined by the query parameters.
         """
@@ -414,7 +416,7 @@ class AbstractClient(object):
         Returns an iterator over the BioSamples optionally matching
         a name or individualId for the given datasetId.
 
-        :param str name: Only BioSamples given this name are returned
+        :param str name: Only BioSamples with this name are returned
         :param str individualId: Only return matches with this
             individualId
         :return: An iterator over the :class:`ga4gh.protocol.BioSample`
@@ -434,7 +436,7 @@ class AbstractClient(object):
         Returns an iterator over the Individuals optionally matching
         a name for the given datasetId.
 
-        :param str name: Only Individuals given this name are returned
+        :param str name: Only Individuals with this name are returned
         :return: An iterator over the :class:`ga4gh.protocol.Individual`
             objects defined by the query parameters.
         :rtype: iter
@@ -453,7 +455,9 @@ class AbstractClient(object):
 
         :param str name: Only ReadGroupSets matching the specified name
             will be returned.
-        :param str bioSampleId: Filters readgroups according to the ID
+        :param str bioSampleId: Only ReadGroupSets with ReadGroups matching
+            the specified BioSampleId will be returned. Only ReadGroups
+            with the given BioSampleId will be included in the ReadGroupSet.
         :return: An iterator over the :class:`ga4gh.protocol.ReadGroupSet`
             objects defined by the query parameters.
         :rtype: iter
