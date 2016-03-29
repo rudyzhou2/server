@@ -6,10 +6,23 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import datetime
+import os
+import json
 
 import ga4gh.datamodel as datamodel
 import ga4gh.protocol as protocol
 import ga4gh.exceptions as exceptions
+
+
+def readJsonMetadata(filepath):
+    jsonFilename = os.path.splitext(filepath)[0] + ".json"
+    metadata = {}
+    try:
+        with open(jsonFilename) as data:
+            metadata = json.load(data)
+    except (ValueError, IOError):
+        raise exceptions.FileOpenFailedException(jsonFilename)
+    return metadata
 
 
 class AbstractBioSample(datamodel.DatamodelObject):
@@ -28,8 +41,13 @@ class AbstractBioSample(datamodel.DatamodelObject):
         self._disease = None
         self._info = {}
         self._name = localId
-        self._individualName = individualName
-        self._individualId = None
+        if individualName is not None:
+            datasetId = self.getParentContainer().getCompoundId()
+            compoundId = datamodel.IndividualCompoundId(
+                datasetId, individualName)
+            self._individualId = str(compoundId)
+        else:
+            self._individualId = None
 
     def toProtocolElement(self):
         bioSample = protocol.BioSample()
@@ -44,16 +62,7 @@ class AbstractBioSample(datamodel.DatamodelObject):
         return bioSample
 
     def getIndividualId(self):
-        """
-        Return a string identifier using the datasetId
-        and localId. LocalIds of individuals are expected
-        to have the same localId as a BioSample.
-        :return:
-        """
-        datasetId = self.getParentContainer().getCompoundId()
-        compoundId = datamodel.IndividualCompoundId(
-            datasetId, self._individualName)
-        return str(compoundId)
+        return self._individualId
 
     def getCreateDateTime(self):
         return self._createDateTime
@@ -74,7 +83,7 @@ class AbstractBioSample(datamodel.DatamodelObject):
         return self._name
 
 
-class JsonBioSample(AbstractBioSample, datamodel.MetadataSidecarMixin):
+class JsonBioSample(AbstractBioSample):
     """
     Allows a BioSample object to be populated using JSON
     metadata information by passing a filepath during
@@ -84,40 +93,22 @@ class JsonBioSample(AbstractBioSample, datamodel.MetadataSidecarMixin):
     def __init__(self, parentContainer, localId, filePath):
         super(JsonBioSample, self).__init__(parentContainer, localId)
         self._filePath = filePath
-        self.loadSidecar(filePath)
+        metadata = readJsonMetadata(filePath)
+        self._createDateTime = metadata.get(
+            "createDateTime", self._createDateTime)
+        self._updateDateTime = metadata.get(
+            "updateDateTime", self._updateDateTime)
+        self._description = metadata.get("description", self._description)
+        self._disease = metadata.get("disease", self._disease)
+        self._info = metadata.get("info", self._info)
+        self._name = metadata.get("name", self._name)
+        self._individualId = metadata.get("individualId", self._individualId)
         self.validate()
 
     def validate(self):
         if not protocol.BioSample.validate(
                 self.toProtocolElement().toJsonDict()):
             raise exceptions.FileOpenFailedException(self._filePath)
-
-    def _getField(self, fieldName):
-        if self.sidecar(fieldName):
-            return self.sidecar(fieldName)
-        else:
-            return self.__getattribute__('_' + fieldName)
-
-    def getIndividualId(self):
-        return self._getField('individualId')
-
-    def getCreateDateTime(self):
-        return self._getField('createDateTime')
-
-    def getUpdateDateTime(self):
-        return self._getField('updateDateTime')
-
-    def getDescription(self):
-        return self._getField('description')
-
-    def getDisease(self):
-        return self._getField('disease')
-
-    def getInfo(self):
-        return self._getField('info')
-
-    def getName(self):
-        return self._getField('name')
 
 
 class AbstractIndividual(datamodel.DatamodelObject):
@@ -172,7 +163,7 @@ class AbstractIndividual(datamodel.DatamodelObject):
         return self._name
 
 
-class JsonIndividual(AbstractIndividual, datamodel.MetadataSidecarMixin):
+class JsonIndividual(AbstractIndividual):
     """
     Allows a Individual object to be populated using JSON
     metadata information by passing a filepath during
@@ -182,7 +173,18 @@ class JsonIndividual(AbstractIndividual, datamodel.MetadataSidecarMixin):
     def __init__(self, parentContainer, localId, filePath):
         super(JsonIndividual, self).__init__(parentContainer, localId)
         self._filePath = filePath
-        self.loadSidecar(filePath)
+        metadata = readJsonMetadata(filePath)
+        self._createDateTime = metadata.get(
+            "createDateTime", self._createDateTime)
+        self._updateDateTime = metadata.get(
+            "updateDateTime", self._updateDateTime)
+        self._description = metadata.get(
+            "description", self._description)
+        self._species = metadata.get(
+            "species", self._species)
+        self._sex = metadata.get("sex", self._sex)
+        self._info = metadata.get("info", self._info)
+        self._name = metadata.get("name", self._name)
         self.validate()
 
     def validate(self):
@@ -190,37 +192,15 @@ class JsonIndividual(AbstractIndividual, datamodel.MetadataSidecarMixin):
                 self.toProtocolElement().toJsonDict()):
             raise exceptions.FileOpenFailedException(self._filePath)
 
-    def _getField(self, fieldName):
-        if self.sidecar(fieldName):
-            return self.sidecar(fieldName)
-        else:
-            return self.__getattribute__('_' + fieldName)
-
-    def getCreateDateTime(self):
-        return self._getField('createDateTime')
-
-    def getUpdateDateTime(self):
-        return self._getField('updateDateTime')
-
-    def getDescription(self):
-        return self._getField('description')
-
     def getSpecies(self):
-        species = self._getField('species')
-        if species:
-            species = protocol.OntologyTerm().fromJsonDict(
-                self._getField('species'))
-        return species
+        if self._species is not None:
+            return protocol.OntologyTerm().fromJsonDict(
+                self._species)
+        else:
+            return None
 
     def getSex(self):
-        sex = self._getField('sex')
-        if sex:
-            sex = protocol.OntologyTerm().fromJsonDict(
-                self._getField('sex'))
-        return sex
-
-    def getInfo(self):
-        return self._getField('info')
-
-    def getName(self):
-        return self._getField('name')
+        if self._sex is not None:
+            return protocol.OntologyTerm().fromJsonDict(
+                self._sex)
+        return None

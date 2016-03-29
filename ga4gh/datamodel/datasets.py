@@ -135,6 +135,12 @@ class AbstractDataset(datamodel.DatamodelObject):
             raise exceptions.BioSampleNotFoundException(id_)
         return self._bioSampleIdMap[id_]
 
+    def getBioSamples(self):
+        """
+        Returns all BioSamples in this dataset
+        """
+        return [self._bioSampleIdMap[id_] for id_ in self._bioSampleIds]
+
     def getIndividual(self, id_):
         """
         Returns the Individual with the specified ID, or raises a
@@ -143,6 +149,12 @@ class AbstractDataset(datamodel.DatamodelObject):
         if id_ not in self._individualIdMap:
             raise exceptions.IndividualNotFoundException(id_)
         return self._individualIdMap[id_]
+
+    def getIndividuals(self):
+        """
+        Returns all Individuals in this dataset
+        """
+        return [self._individualIdMap[id_] for id_ in self._individualIds]
 
     def getBioSampleByIndex(self, index):
         """
@@ -247,10 +259,13 @@ class SimulatedDataset(AbstractDataset):
             for callSet in callSets:
                 bioSample = datamodel.biodata.AbstractBioSample(
                     self, callSet.getLocalId(), callSet.getLocalId())
+                bioSample2 = datamodel.biodata.AbstractBioSample(
+                    self, callSet.getLocalId() + "2", callSet.getLocalId())
                 individual = datamodel.biodata.AbstractIndividual(
                     self, callSet.getLocalId())
                 self.addIndividual(individual)
                 self.addBioSample(bioSample)
+                self.addBioSample(bioSample2)
             self.addVariantSet(variantSet)
             variantAnnotationSet = variants.SimulatedVariantAnnotationSet(
                 self, "simVas{}".format(i), variantSet)

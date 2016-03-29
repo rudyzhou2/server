@@ -10,7 +10,6 @@ import base64
 import collections
 import glob
 import os
-import json
 
 import ga4gh.exceptions as exceptions
 
@@ -505,25 +504,3 @@ class PysamDatamodelMixin(object):
 
     def getFileHandle(self, dataFile):
         return fileHandleCache.getFileHandle(dataFile, self.openFile)
-
-
-class MetadataSidecarMixin(object):
-    """
-    Loads a human readable sidecar and makes its values available as
-    self._sidecar(key). Accepts the filename from which we will load
-    the data.
-    """
-    def loadSidecar(self, filepath):
-        jsonFilename = os.path.splitext(filepath)[0] + ".json"
-        try:
-            with open(jsonFilename) as data:
-                self._sidecar = json.load(data)
-        except (ValueError, IOError):
-            raise exceptions.FileOpenFailedException(jsonFilename)
-            self._sidecar = {}
-
-    def sidecar(self, key):
-        if key in self._sidecar:
-            return self._sidecar[key]
-        else:
-            return None

@@ -22,60 +22,59 @@ def main():
     with open('20130606_sample_info.csv', 'r') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
-            with open(
-                    "biodata/biosamples/" +
-                    row['Sample'] + ".json", 'w') as bioSampleOut, \
-                open(
-                    "biodata/individuals/" +
-                    row['Sample'] + ".json", 'w') as individualOut:
-                description = "{} {} {}".format(
-                    row['Population'],
-                    row['Population Description'],
-                    row['Gender'])
-                info = {}
-                for key in row:
-                    info[key] = [row[key]]
-                biosample = {
-                    "name": row['Sample'],
-                    "description": description,
-                    "disease": None,  # Ontology term
-                    "createDateTime": datetime.datetime.now().isoformat(),
-                    "updateDateTime": datetime.datetime.now().isoformat(),
-                    "info": info
+            description = "{} {} {}".format(
+                row['Population'],
+                row['Population Description'],
+                row['Gender'])
+            info = {}
+            for key in row:
+                info[key] = [row[key]]
+            biosample = {
+                "name": row['Sample'],
+                "description": description,
+                "disease": None,  # Ontology term
+                "createDateTime": datetime.datetime.now().isoformat(),
+                "updateDateTime": datetime.datetime.now().isoformat(),
+                "info": info
+            }
+            if row['Gender'] == 'male':
+                sex = {
+                    "id": "PATO:0020001",
+                    "term": "male genotypic sex",
+                    "sourceName": "PATO",
+                    "sourceVersion": "2015-11-18"
                 }
-                if row['Gender'] == 'male':
-                    sex = {
-                        "id": "PATO:0020001",
-                        "term": "male genotypic sex",
-                        "sourceName": "PATO",
-                        "sourceVersion": "2015-11-18"
-                    }
-                elif row['Gender'] == 'female':
-                    sex = {
-                        "id": "PATO:0020002",
-                        "term": "female",
-                        "sourceName": "PATO",
-                        "sourceVersion": "2015-11-18"
-                    }
-                else:
-                    sex = None
-                individual = {
-                    "name": row['Sample'],
-                    "description": description,
-                    "sex": None,  # Ontology term
-                    "species": {
-                        "term": "Homo sapiens",
-                        "id": "NCBITaxon:9606",
-                        "sourceName": "http://purl.obolibrary.org/obo",
-                        "sourceVersion": "2016-02-02"
-                    },
-                    "sex": sex,
-                    "createDateTime": datetime.datetime.now().isoformat(),
-                    "updateDateTime": datetime.datetime.now().isoformat(),
-                    "info": info
+            elif row['Gender'] == 'female':
+                sex = {
+                    "id": "PATO:0020002",
+                    "term": "female",
+                    "sourceName": "PATO",
+                    "sourceVersion": "2015-11-18"
                 }
-
+            else:
+                sex = None
+            individual = {
+                "name": row['Sample'],
+                "description": description,
+                "species": {
+                    "term": "Homo sapiens",
+                    "id": "NCBITaxon:9606",
+                    "sourceName": "http://purl.obolibrary.org/obo",
+                    "sourceVersion": "2016-02-02"
+                },
+                "sex": sex,
+                "createDateTime": datetime.datetime.now().isoformat(),
+                "updateDateTime": datetime.datetime.now().isoformat(),
+                "info": info
+            }
+            bioSampleFilepath = \
+                "biodata/biosamples/" + row['Sample'] + ".json"
+            individualFilePath = \
+                "biodata/individuals/" + row['Sample'] + ".json"
+            with open(bioSampleFilepath, 'w') as bioSampleOut:
                 json.dump(biosample, bioSampleOut)
+
+            with open(individualFilePath, 'w') as individualOut:
                 json.dump(individual, individualOut)
 
 if __name__ == "__main__":

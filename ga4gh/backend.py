@@ -429,14 +429,15 @@ class Backend(object):
                         request, numObjects, getByIndexMethod, False):
                     nextPageToken = str(currentIndex)
                     break
-            if (request.name == "" or request.name) and request.bioSampleId:
+            if (request.name == "" or request.name is not None) and (
+                        request.bioSampleId is not None):
                 if request.name == readGroupSet.name:
                     yield self._filterReadGroupsByBioSampleId(
                         request.bioSampleId, readGroupSet), nextPageToken
-            elif (request.name == "" or request.name):
+            elif (request.name == "" or request.name is not None):
                 if request.name == readGroupSet.name:
                     yield readGroupSet, nextPageToken
-            elif request.bioSampleId:
+            elif request.bioSampleId is not None:
                 if len(self._filterReadGroupsByBioSampleId(
                         request.bioSampleId,
                         readGroupSet).readGroups) != 0:
@@ -468,20 +469,21 @@ class Backend(object):
                         request, numObjects, getByIndexMethod, False):
                     nextPageToken = str(currentIndex)
                     break
-            if request.name and request.bioSampleId:
+            if request.name is not None and request.bioSampleId is not None:
                 if callSet.name == request.name and (
                         callSet.bioSampleId == request.bioSampleId):
                     yield callSet, nextPageToken
-            elif request.name:
+            elif request.name is not None:
                 if callSet.name == request.name:
                     yield callSet, nextPageToken
-            elif request.bioSampleId:
+            elif request.bioSampleId is not None:
                 if callSet.bioSampleId == request.bioSampleId:
                     yield callSet, nextPageToken
             else:
                 yield callSet, nextPageToken
 
-    def _bioSampleObjectGenerator(self, request, numObjects, getByIndexMethod):
+    def _bioSampleObjectGenerator(
+            self, request, numObjects, getByIndexMethod, recur=True):
         """
         Function for iterating through biosamples that optionally
         filters by a name and individualId provided in the request.
@@ -493,23 +495,30 @@ class Backend(object):
             bioSample = getByIndexMethod(currentIndex).toProtocolElement()
             currentIndex += 1
             nextPageToken = None
-            if currentIndex < numObjects:
-                nextPageToken = str(currentIndex)
-            if request.name or request.individualId:
-                if (request.name == bioSample.name) and (
-                            request.individualId == bioSample.individualId):
+            if currentIndex < numObjects and recur:
+                request.pageToken = str(currentIndex)
+                for bs, pageToken in self._bioSampleObjectGenerator(
+                       request, numObjects, getByIndexMethod, False):
+                    nextPageToken = str(currentIndex)
+                    break
+            nameExists = request.name is not None
+            individualIdExists = request.individualId is not None
+            nameMatch = request.name == bioSample.name
+            individualIdMatch = request.individualId == bioSample.individualId
+            if nameExists and individualIdExists:
+                if nameMatch and individualIdMatch:
                     yield bioSample, nextPageToken
-                if (request.name and not request.individualId) and (
-                            request.name == bioSample.name):
+            elif nameExists and not individualIdExists:
+                if nameMatch:
                     yield bioSample, nextPageToken
-                if (request.individualId and not request.name) and (
-                            request.individualId == bioSample.individualId):
+            elif individualIdExists and not nameExists:
+                if individualIdMatch:
                     yield bioSample, nextPageToken
             else:
                 yield bioSample, nextPageToken
 
     def _individualObjectGenerator(
-            self, request, numObjects, getByIndexMethod):
+            self, request, numObjects, getByIndexMethod, recur=True):
         """
         Function for iterating through individuals that optionally
         filters by a name provided in the request.
@@ -521,9 +530,13 @@ class Backend(object):
             individual = getByIndexMethod(currentIndex).toProtocolElement()
             currentIndex += 1
             nextPageToken = None
-            if currentIndex < numObjects:
-                nextPageToken = str(currentIndex)
-            if request.name and request.name != "":
+            if currentIndex < numObjects and recur:
+                request.pageToken = str(currentIndex)
+                for ind, pageToken in self._individualObjectGenerator(
+                       request, numObjects, getByIndexMethod, False):
+                    nextPageToken = str(currentIndex)
+                    break
+            if request.name is not None and request.name != "":
                 if request.name == individual.name:
                     yield individual, nextPageToken
             else:

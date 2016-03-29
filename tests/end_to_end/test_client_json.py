@@ -287,3 +287,34 @@ class TestClientJson(TestClientOutput):
                 self.verifyParsedOutputsEqual(
                     iterator, "individuals-search", "--name {}".format(
                         individual.name))
+
+    def testSearchVariantAnnotationSets(self):
+        for dataset in self._client.searchDatasets():
+            for variantSet in self._client.searchVariantSets(dataset.id):
+                iterator = self._client.searchVariantAnnotationSets(
+                    variantSet.id)
+                args = "{}".format(variantSet.id)
+                self.verifyParsedOutputsEqual(
+                    iterator, "variantannotationsets-search", args)
+
+    def testSearchVariantAnnotations(self):
+        test_executed = 0
+        start = 0
+        end = 10000000
+        referenceName = "1"
+        for dataset in self._client.searchDatasets():
+            for variantSet in self._client.searchVariantSets(dataset.id):
+                searchIterator = self._client.searchVariantAnnotationSets(
+                    variantSet.id)
+                for variantAnnotationSet in searchIterator:
+                    iterator = self._client.searchVariantAnnotations(
+                        variantAnnotationSet.id,
+                        start=start,
+                        end=end,
+                        referenceName=referenceName)
+                    args = ("--variantAnnotationSetId {}"
+                            " --start {} --end {} -r {}").format(
+                        variantAnnotationSet.id, start, end, referenceName)
+                    test_executed += self.verifyParsedOutputsEqual(
+                        iterator, "variantannotations-search", args)
+        self.assertGreater(test_executed, 0)
