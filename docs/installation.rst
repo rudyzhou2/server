@@ -103,8 +103,10 @@ and insert the following contents towards the end of the file
         Require all granted
     </Directory>
 
-Note: be sure to keep the number of threads limited to 1 in the WWSGIDaemonProcess
-setting. Performance tuning should be done using the processes setting.
+.. warning::
+
+    Be sure to keep the number of threads limited to 1 in the WSGIDaemonProcess
+    setting. Performance tuning should be done using the processes setting.
 
 The instructions for configuring Apache 2.2 (on Ubuntu 14.04) are the same as
 above with thee following exceptions:
