@@ -12,6 +12,7 @@ import datetime
 import socket
 import urlparse
 import functools
+import json
 
 import flask
 import flask.ext.cors as cors
@@ -21,6 +22,7 @@ import oic
 import oic.oauth2
 import oic.oic.message as message
 import requests
+from rauth import OAuth2Service
 
 import ga4gh
 import ga4gh.backend as backend
@@ -30,6 +32,7 @@ import ga4gh.exceptions as exceptions
 import ga4gh.datarepo as datarepo
 import logging
 from logging import StreamHandler
+
 
 
 MIMETYPE = "application/json"
@@ -254,6 +257,8 @@ def configure(configFile=None, baseConfig="ProductionConfig",
     app.oidcClient = None
     app.tokenMap = None
     app.myPort = port
+
+    ###original OIDC config untouched###################################
     if "OIDC_PROVIDER" in app.config:
         # The oic client. If we're testing, we don't want to verify
         # SSL certificates
@@ -296,6 +301,16 @@ def configure(configFile=None, baseConfig="ProductionConfig",
                 redirect_uris=[redirectUri],
                 verify_ssl=False)
             app.oidcClient.store_registration_info(response)
+    #######################################################################
+    # add OAuth2 client via rauth
+    if "OAuth2_PROVIDER" in app.config:
+        app.oauth2Client = OAuth2Service(
+            client_id=app.config['OAuth2_CLIENT_ID'],
+            client_secret=app.config('OAuth2_CLIENT_SECRET'),
+            redirect_uris=[redirectUri],
+            authorize_url=app.config['OAuth2_AUTHZ_ENDPOINT'],
+            access_token_url=app.config['OAuth2_TOKEN_ENDPOINT'],
+            base_url=app.config['OAuth2_PROVIDER_URL'])
 
 
 def getFlaskResponse(responseString, httpStatus=200):
@@ -381,6 +396,24 @@ def startLogin():
     return flask.redirect(result.url)
 
 
+def oauth2Login():
+    """
+    Generate redirect URL to the OAuth2 provider and returns the
+    redirect response through rauth module implementation
+    :return: Flask redirect url to OAuth2 provider
+    """
+    flask.session["state"] = oic.oauth2.rndstr(SECRET_KEY_LENGTH)
+    args = {
+        'scope': 'openid+uaa.user',
+        'response_type': 'code',
+        'state': flask.session["state"],
+        'redirect_uri': app.oauth2Client.redirect_uris[0]
+    }
+
+    url = app.oauth2Client.get_authorize_url(**args)
+    return flask.redirect(url)
+
+
 @app.before_request
 def checkAuthentication():
     """
@@ -397,9 +430,9 @@ def checkAuthentication():
     the request arguments, we're using the command line and just raise an
     exception.
     """
-    if app.oidcClient is None:
+    if app.oidcClient and app.oauth2Client is None:
         return
-    if flask.request.endpoint == 'oidcCallback':
+    if flask.request.endpoint == 'oidcCallback' or 'oauth2Callback':
         return
     key = flask.session.get('key') or flask.request.args.get('key')
     if app.tokenMap.get(key) is None:
